@@ -1,0 +1,28 @@
+title|Fry Thief Seagull!|ryan
+fries|FRIES!|ryan
+bombs|Bombs away!|ryan
+splat|Splat!|ryan
+yum|Mmm, French fries!|ryan
+hey|HEY!|joe
+myfries|MY FRIES!|kusal
+noo|Nooo! My fries!|amy
+gross|Eww! Bird!|amy
+w1|Wave one. Grand Haven Beach!|amy
+w2|Next wave! More beach people!|amy
+l2|Holland State Park!|amy
+l3|Sleeping Bear Dunes!|amy
+l4|Belle Isle Beach!|amy
+l5|Pictured Rocks!|amy
+b1|It's Lifeguard Larry and his giant whistle!|ryan
+b2|It's Chef Frank from the Fry Shack! Watch out for ketchup!|ryan
+b3|All hail the Sandcastle King!|ryan
+b4|Beep boop! It's the Beach Ball Bot!|ryan
+b5|Here comes the Hot Dog Truck! Final boss!|ryan
+down|Boss splatted! Great job, Alex!|amy
+ouch|Ouch! Watch out!|amy
+oops|Oopsie! Let's try again!|amy
+dog|Uh oh, a doggy! Fly high!|amy
+legend|Alex, you're a fry thief legend!|ryan
+again|Another summer! Even more fries!|ryan
+nice|Nice one, Alex!|ryan
+combo|Splat combo!|amy

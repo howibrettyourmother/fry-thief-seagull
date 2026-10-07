@@ -1,0 +1,16 @@
+{
+  "name": "Fry Thief Seagull",
+  "short_name": "Seagull",
+  "description": "A silly seagull steals French fries at Michigan beaches!",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#5ec4ff",
+  "theme_color": "#29b6f6",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
