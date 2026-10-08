@@ -1,8 +1,8 @@
-# Fry Thief Seagull 🍟
+# Poopy Seagull 💩🍟
 
 A silly beach game for Alex: be a cartoon seagull at Michigan beaches, splat beachgoers and swoop down to steal their French fries.
 
-**Play:** https://howibrettyourmother.github.io/fry-thief-seagull/ (on iPhone: Share → Add to Home Screen → "Seagull")
+**Play:** https://howibrettyourmother.github.io/fry-thief-seagull/ (on iPhone: Share → Add to Home Screen → "Poopy Gull")
 
 - **Left thumb**: floating joystick (appears where you touch) to fly; works in portrait or landscape
 - **Right side / POOP button**: drop (hold = rapid fire). **SWOOP** dives to yoink fries (or just fly close). **MEGA DUMP** after eating enough fries

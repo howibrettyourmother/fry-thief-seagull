@@ -1,4 +1,4 @@
-# Home Screen / favicon icons: a goofy seagull grabbing French fries over a Lake Michigan beach. Run: python3 src/icon.py
+# Home Screen / favicon icons: Poopy Seagull - a goofy gull with fries, plus a big brown poop swirl and splat. Run: python3 src/icon.py
 from PIL import Image, ImageDraw
 import os, math
 D=os.path.dirname(os.path.abspath(__file__));OUT=os.path.join(D,'..');S=1024
@@ -37,14 +37,27 @@ def master(pad=0.0):
     # fry carton on the sand
     Pg([(700,860),(860,860),(840,1000),(720,1000)],fill=(229,57,53));d.rectangle([P(765,860),P(795,1000)],fill=(255,255,255))
     for i in range(5):x=715+i*30;d.rectangle([P(x,780+(i%2)*20),P(x+22,870)],fill=(255,202,40))
+    # big brown poop swirl (bottom-left) with stink lines, and a splat on the sand
+    PB,PD,PH=(139,90,43),(90,53,23),(200,146,90)
+    def sw(cx,cy,sc):
+        for (w,h,dy) in [(150,80,0),(110,62,-62),(70,46,-116)]:
+            E(cx-w*sc,cy+dy*sc-h*sc+8*sc,cx+w*sc,cy+dy*sc+h*sc+8*sc,fill=PD);E(cx-w*sc,cy+dy*sc-h*sc,cx+w*sc,cy+dy*sc+h*sc,fill=PB)
+        Pg([(cx-26*sc,cy-150*sc),(cx,cy-205*sc),(cx+26*sc,cy-150*sc)],fill=PB)
+        for (x0,y0,w,h) in [(-110,-20,60,24),(-70,-80,42,18),(-40,-128,26,12)]:E(cx+x0*sc,cy+y0*sc,cx+(x0+w)*sc,cy+(y0+h)*sc,fill=PH)
+        for i in range(3):
+            x=cx+(-60+i*60)*sc;Ln([(x,cy-230*sc),(x-18*sc,cy-262*sc),(x+4*sc,cy-292*sc),(x-12*sc,cy-322*sc)],12*sc,fill=(124,179,66))
+    sw(215,905,1.0)
+    E(470,930,640,975,fill=PD);E(470,922,640,965,fill=PB);E(450,940,490,962,fill=PB);E(620,945,665,968,fill=PB);E(500,926,540,940,fill=PH)
+    # a fresh drop falling from the gull
+    E(330,690,372,745,fill=PD);E(328,686,368,738,fill=PB);Pg([(336,692),(348,662),(360,692)],fill=PB);E(336,698,348,714,fill=PH)
     return im
-m=master()
-for n,sz in [('apple-touch-icon.png',180),('icon-512.png',512),('icon-192.png',192),('favicon-32.png',32)]:m.resize((sz,sz),Image.LANCZOS).save(os.path.join(OUT,n),optimize=True)
+m=master();m.save('/workspace/poopy-seagull-icon-1024.png')
+for n,sz in [('apple-touch-icon.png',180),('apple-touch-icon-167.png',167),('apple-touch-icon-152.png',152),('apple-touch-icon-120.png',120),('icon-512.png',512),('icon-192.png',192),('favicon-32.png',32)]:m.resize((sz,sz),Image.LANCZOS).save(os.path.join(OUT,n),optimize=True)
 master(pad=0.2).resize((512,512),Image.LANCZOS).save(os.path.join(OUT,'icon-maskable-512.png'),optimize=True)
 # social preview
 og=Image.new('RGB',(1200,630),(94,196,255));og.paste(m.resize((630,630),Image.LANCZOS),(570,0));dd=ImageDraw.Draw(og)
 try:
     from PIL import ImageFont;F=ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',84)
 except Exception:F=None
-for i,t in enumerate(['FRY THIEF','SEAGULL']):dd.text((50,190+i*110),t,fill=(255,210,63) if i==0 else (255,255,255),font=F,stroke_width=8,stroke_fill=(13,71,161))
+for i,t in enumerate(['POOPY','SEAGULL']):dd.text((50,190+i*110),t,fill=(255,210,63) if i==0 else (255,255,255),font=F,stroke_width=8,stroke_fill=(13,71,161))
 og.save(os.path.join(OUT,'og.png'),optimize=True)

@@ -82,7 +82,7 @@ function drawPause(){UI=[];X.fillStyle='rgba(20,40,80,0.5)';X.fillRect(0,0,W,H);
 // ---------- title ----------
 function lockIcon(x,y){X.beginPath();X.arc(x,y-5,7,Math.PI,TAU);strokeC('#fff',3);rrect(x-9,y-5,18,15,3);X.fillStyle='#fff';X.fill();circ(x,y+2,2,'#9e9e9e')}
 function drawTitle(){UI=[];lv=selLv;L=LEVELS[lv];drawBackdrop(selLv);X.fillStyle='rgba(255,255,255,0.12)';X.fillRect(0,0,W,H);
-  const ly=TOP+70;X.save();X.translate(W/2,ly);X.rotate(-0.04+Math.sin(T*1.4)*0.015);txt('FRY THIEF',0,-22,Math.min(50,W*0.125),'#ffd23f',{st:'#0d47a1',sw:9});txt('SEAGULL',0,28,Math.min(58,W*0.145),'#fff',{st:'#0d47a1',sw:10});X.restore();
+  const ly=TOP+70;X.save();X.translate(W/2,ly);X.rotate(-0.04+Math.sin(T*1.4)*0.015);txt('POOPY',0,-22,Math.min(56,W*0.14),'#ffd23f',{st:'#0d47a1',sw:9});txt('SEAGULL',0,28,Math.min(58,W*0.145),'#fff',{st:'#0d47a1',sw:10});X.restore();
   txt('Steal fries. Bomb butts. No regrets.',W/2,ly+72,16,'#fff',{st:'#0d47a1',sw:5});
   const gy=lerp(ly+160,H*0.4,0.5)+Math.sin(T*2.4)*8,s=Math.min(2.3,H/320);X.save();X.translate(W/2-10,gy);X.scale(s,s);drawGull(0,0,{flap:T*9,tilt:Math.sin(T*1.7)*0.08,carry:true});X.restore();
   for(let i=0;i<4;i++){const a=T*1.2+i*TAU/4;fryCone(W/2+Math.cos(a)*130,gy+Math.sin(a)*36+10,0.9)}
@@ -96,7 +96,7 @@ function drawTitle(){UI=[];lv=selLv;L=LEVELS[lv];drawBackdrop(selLv);X.fillStyle
   bigBtn('diff',INL+14,bb-24,150,48,diff?'HARD':'NORMAL',diff?'#e53935':'#ff8a26',()=>{diff=1-diff;LS.set('diff',diff);best=+LS.get('best'+diff,0)||0;AUD.SFX[diff?'fart':'boing']()},20);txt('BEST '+best,W/2+30,bb,17,'#fff',{st:'#0d47a1',sw:4})}
 // ---------- victory ----------
 function drawWin(){UI=[];lv=4;L=LEVELS[4];drawBackdrop(4);X.fillStyle='rgba(255,240,200,0.2)';X.fillRect(0,0,W,H);const e=endStats||{score,loop,...RUN,cont:oopsN};
-  const y0=TOP+40;txt('FRY THIEF',W/2,y0+10,Math.min(44,W*0.11),'#ffd23f',{st:'#0d47a1',sw:8});txt('LEGEND!',W/2,y0+56,Math.min(50,W*0.12),'#fff',{st:'#e65100',sw:8});
+  const y0=TOP+40;txt('POOPY SEAGULL',W/2,y0+10,Math.min(44,W*0.11),'#ffd23f',{st:'#0d47a1',sw:8});txt('LEGEND!',W/2,y0+56,Math.min(50,W*0.12),'#fff',{st:'#e65100',sw:8});
   const gy=y0+140+Math.sin(T*3)*10;X.save();X.translate(W/2,gy);X.scale(1.5,1.5);drawGull(0,0,{flap:T*10,carry:true,munch:1});X.restore();X.save();X.translate(W/2+30,gy-44);poly([-22,0,-22,-26,-11,-14,0,-30,11,-14,22,-26,22,0],'#ffd23f');X.restore();
   const rows=[['Summer'+(diff?' (HARD)':''),e.loop+1],['Butts Bombed',e.splats],['Fries Yoinked',e.fries],['Dads Ruined',e.dads],['Toupees Launched',e.toupees],['Mega Dumps',e.megas],['Continues',e.cont],['Score',e.score],['Best',best]];
   const py=Math.min(gy+60,H*0.42),pw=Math.min(340,W-30),ph=rows.length*26+20;panel(pw,ph,py,'rgba(255,253,240,0.95)');
