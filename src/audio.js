@@ -65,6 +65,13 @@ const AUD=(()=>{
     munch:safe(()=>{const t=now();for(let i=0;i<3;i++){const G=g(0,sfxBus);env(G,t+i*0.09,0.002,0.02,0.05,0.22);n(t+i*0.09,0.08,f('bandpass',1800-i*300,1.2,G))}blip('triangle',mtof(84),mtof(91),t+0.28,0.1,0.06)}),
     whistle:safe(()=>{const t=now(),G=g(0,sfxBus);env(G,t,0.01,0.35,0.12,0.09);const x=o('sine',2300,t,0.5,G);const L=C.createOscillator(),LG=C.createGain();L.frequency.value=28;LG.gain.value=120;L.connect(LG);LG.connect(x.frequency);L.start(t);L.stop(t+0.55)}),
     honk:safe(()=>{const t=now();[0,0.22].forEach((d,i)=>{const G=g(0,sfxBus);env(G,t+d,0.01,0.14,0.05,0.07);o('square',i?233:311,t+d,0.2,f('lowpass',1600,1,G));o('square',i?175:233,t+d,0.2,f('lowpass',1600,1,G))})}),
+    fart:safe((k)=>{const t=now();k=k==null?(R()*4)|0:k;const d=[0.32,0.6,0.16,0.9][k],f0=[95,72,140,60][k],G=g(0,sfxBus);env(G,t,0.01,d*0.6,d*0.35,0.3);const F=f('lowpass',[650,480,900,420][k],2.5,G);
+      const x=o('sawtooth',f0,t,d,F);x.frequency.linearRampToValueAtTime(f0*(k===2?1.6:0.7),t+d);const L=C.createOscillator(),LG=C.createGain();L.frequency.value=[24,17,32,12][k];LG.gain.value=f0*0.35;L.connect(LG);LG.connect(x.frequency);L.start(t);L.stop(t+d+0.05);
+      const N=g(0,sfxBus);env(N,t,0.01,d*0.5,d*0.4,0.1);n(t,d,f('lowpass',300,1,N))}),
+    wet:safe(()=>{const t=now(),G=g(0,sfxBus);env(G,t,0.001,0.04,0.2,0.34);const F=f('bandpass',900,1.4,G);n(t,0.28,F);F.frequency.exponentialRampToValueAtTime(220,t+0.25);
+      for(let i=0;i<4;i++){const s=t+0.05+i*0.04+rr(0,0.03);blip('sine',rr(500,900),rr(150,300),s,0.06,0.07)}}),
+    mega:safe(()=>{const t=now(),G=g(0,sfxBus);env(G,t,0.002,0.25,0.9,0.5);n(t,1.2,f('lowpass',500,0.8,G));const B=g(0,sfxBus);env(B,t,0.002,0.1,0.5,0.4);const x=o('sine',140,t,0.7,B);x.frequency.exponentialRampToValueAtTime(30,t+0.6)}),
+    charge:safe(()=>{const t=now();[60,64,67,72,76,79].forEach((m,i)=>blip('square',mtof(m),mtof(m),t+i*0.045,0.05,0.05))}),
     click:safe(()=>{const t=now();blip('square',900,1300,t,0.05,0.07)})
   };
   // ---------- one voice at a time, with ducking ----------

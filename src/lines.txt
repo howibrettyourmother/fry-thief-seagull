@@ -1,28 +1,49 @@
 title|Fry Thief Seagull!|ryan
 fries|FRIES!|ryan
+mine|Mine! Mine! Mine!|ryan
 bombs|Bombs away!|ryan
 splat|Splat!|ryan
 yum|Mmm, French fries!|ryan
+mega|Mega dump!|ryan
+chili|Uh oh. Chili cheese fries.|ryan
+hangry|So... hangry...|ryan
 hey|HEY!|joe
 myfries|MY FRIES!|kusal
 noo|Nooo! My fries!|amy
 gross|Eww! Bird!|amy
-w1|Wave one. Grand Haven Beach!|amy
-w2|Next wave! More beach people!|amy
+toupee|My toupee!|joe
+car|Not my new car!|kusal
+mouth|It's in my mouth!|amy
+cry|Waaah! I just did leg day!|joe
+laugh|Ha ha! Dad got pooped on!|amy
+w1|Level one. Grand Haven Beach!|amy
+w2|Next wave! Faster!|amy
 l2|Holland State Park!|amy
 l3|Sleeping Bear Dunes!|amy
 l4|Belle Isle Beach!|amy
 l5|Pictured Rocks!|amy
-b1|It's Lifeguard Larry and his giant whistle!|ryan
-b2|It's Chef Frank from the Fry Shack! Watch out for ketchup!|ryan
-b3|All hail the Sandcastle King!|ryan
-b4|Beep boop! It's the Beach Ball Bot!|ryan
-b5|Here comes the Hot Dog Truck! Final boss!|ryan
-down|Boss splatted! Great job, Alex!|amy
-ouch|Ouch! Watch out!|amy
-oops|Oopsie! Let's try again!|amy
-dog|Uh oh, a doggy! Fly high!|amy
-legend|Alex, you're a fry thief legend!|ryan
+b1|It's Lifeguard Larry! No pooping on my beach!|joe
+t1|Tweet tweet! Out of the water, bird brain!|joe
+d1|My whistle! It's full of poop!|joe
+b2|Chef Frank here! Nobody steals my fries!|kusal
+t2|Taste my ketchup, you flying rat!|kusal
+d2|Ugh! That is NOT my secret sauce!|kusal
+b3|Bow before the Sandcastle King!|ryan
+t3|Guards! Bucket that bird!|ryan
+d3|My castle! It smells like a porta potty!|ryan
+b4|Beep boop. Seagull detected. Initiating bounce.|joe
+t4|Error. Error. Poop on sensor. Maximum bounce!|joe
+d4|System failure. Too. Much. Poop.|joe
+b5|Honk honk! The Hot Dog Truck! Final boss!|kusal
+t5|Eat mustard, feather face!|kusal
+d5|Noooo! My hot dogs are ruined!|kusal
+ouch|Ouch!|amy
+oops|Wipeout! Get back up there!|amy
+dog|Incoming dog!|amy
+legend|Fry thief legend! The beaches will never be clean again.|ryan
 again|Another summer! Even more fries!|ryan
-nice|Nice one, Alex!|ryan
+nice|Nice shot!|ryan
 combo|Splat combo!|amy
+perfect|No hits! Score bonus!|amy
+wave|Wave complete!|amy
+hard|Hard mode. Good luck, bird.|ryan
