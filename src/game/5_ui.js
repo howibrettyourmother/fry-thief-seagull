@@ -3,7 +3,7 @@ let UI=[],HUDB=[];
 function btn(id,x,y,w,h,fn){UI.push({id,x,y,w,h,fn})}
 function hbtn(id,x,y,w,h,fn){HUDB.push({id,x,y,w,h,fn})}
 function uiTap(p){for(const b of UI)if(inR(p,b)){AUD.SFX.click();b.fn();return}
-  if(state==='card'&&stT>0.4)startPlay();else if(state==='stats'&&stT>1.2)nextFromStats();else if(state==='oops'&&stT>1.2)respawn();else if(state==='win'){AUD.SFX.fart();burst(p.x,p.y,30,['#ffd23f','#ff5d8f','#4fc3f7','#fff','#81c784'],260,6)}}
+  if(state==='card'&&stT>0.4)startPlay();else if(state==='stats'&&stT>1.2)nextFromStats();else if(state==='oops'&&stT>1.2)respawn();else if(state==='win'){AUD.SFX.fart(null,1);burst(p.x,p.y,30,['#ffd23f','#ff5d8f','#4fc3f7','#fff','#81c784'],260,6)}}
 function uiKey(){if(state==='title')newGame(selLv);else if(state==='card')startPlay();else if(state==='stats'&&stT>1.2)nextFromStats();else if(state==='oops'&&stT>1.2)respawn()}
 function goTitle(){saveBest();state='title';paused=false;clearWorld();resetInput();AUD.setTheme('title');selLv=Math.min(selLv,unlockLv-1)}
 // ---------- world ----------
@@ -25,7 +25,7 @@ function drawWorld(){drawBackdrop(lv);const g=GY();
   if(state==='play'||state==='card'||state==='oops'){
     if(state==='play'){const dy=g-60-gull.y,t=dy>0?(-80+Math.sqrt(6400+2200*dy))/1100:0,lx=gull.x-6+gull.vx*0.3*t;X.globalAlpha=0.4+0.12*Math.sin(T*6);ell(lx,g+6,16,5,'#fff');X.beginPath();X.ellipse(lx,g+6,16,5,0,0,TAU);strokeL(2,'#0d47a1');X.globalAlpha=1}
     ell(gull.x,g+8,22*(0.4+0.6*(gull.y/g)),5,'rgba(0,0,0,0.12)');drawGull(gull.x,gull.y,{flap:gull.flap,tilt:gull.tilt,inv:gull.inv>0,carry:gull.carry>0,munch:gull.munch});
-    if(chiliT>0)for(let i=0;i<2;i++)circ(gull.x-34+rr(-4,4),gull.y+6+rr(-4,4),rr(3,6),'rgba(160,140,90,0.35)');
+    if(chiliT>0)for(let i=0;i<2;i++)circ(gull.x-34+rr(-4,4),gull.y+6+rr(-4,4),rr(3,6),'rgba(110,70,30,0.45)');
     if(hangry)txt('HANGRY',gull.x,gull.y-34,13,'#ff5252',{st:'#fff',sw:3})}
   drawParts()}
 function drawParts(){for(const p of parts){const k=1-p.t/p.life;X.globalAlpha=Math.min(1,k*2);if(p.conf){X.save();X.translate(p.x,p.y);X.rotate(p.rot);X.fillStyle=p.c;X.fillRect(-p.r,-p.r/2,p.r*2,p.r);X.restore()}else circ(p.x,p.y,p.r*(0.4+0.6*k),p.c)}X.globalAlpha=1;
@@ -53,7 +53,7 @@ function drawControls(){
   if(joy.id!=null){X.globalAlpha=0.5;circ(joy.ox,joy.oy,JR,'rgba(255,255,255,0.35)');X.beginPath();X.arc(joy.ox,joy.oy,JR,0,TAU);strokeC('#fff',3);X.globalAlpha=0.85;circ(joy.ox+joy.dx*JR,joy.oy+joy.dy*JR,26,'#fff');X.globalAlpha=1}
   else if(runTime<15&&!(DEBUG&&bot.on)){const x=INL+90,y=H-Math.max(BOT,8)-100;X.globalAlpha=0.3+0.1*Math.sin(T*4);circ(x,y,JR,'rgba(255,255,255,0.4)');circ(x,y,24,'#fff');X.globalAlpha=1;txt('FLY: touch & drag',x,y+JR+14,13,'#fff',{st:'#0d47a1',sw:3})}
   const f=poopBtn(),dn=poopHeld>0;circ(f.x,f.y,f.r,dn?'rgba(255,255,255,0.98)':'rgba(255,255,255,0.75)');X.beginPath();X.arc(f.x,f.y,f.r,0,TAU);strokeC(chiliT>0?'#ff8f00':'#0d47a1',dn?6:4);
-  ell(f.x,f.y-8,13,15,'#fff');X.beginPath();X.ellipse(f.x,f.y-8,13,15,0,0,TAU);strokeC('#90a4ae',2);circ(f.x-4,f.y-12,3,'#e0e0e0');txt('POOP',f.x,f.y+22,15,'#0d47a1');
+  X.save();X.translate(f.x,f.y-6);X.scale(1.25,1.25);poopSwirl();X.restore();txt('POOP',f.x,f.y+22,15,'#0d47a1');
   const s=swoopBtn(),rd=gull.swCD<=0;circ(s.x,s.y,s.r,rd?'rgba(255,213,79,0.85)':'rgba(255,255,255,0.4)');X.beginPath();X.arc(s.x,s.y,s.r,0,TAU);strokeC('#e65100',3);poly([s.x-10,s.y-10,s.x+10,s.y-10,s.x,s.y+6],'#e65100');txt('SWOOP',s.x,s.y+18,10,'#e65100');
   if(megaReady()){const m=megaBtn(),pu=1+Math.sin(T*8)*0.06;circ(m.x,m.y,m.r*pu,'rgba(141,110,99,0.92)');X.beginPath();X.arc(m.x,m.y,m.r*pu,0,TAU);strokeC('#ffd23f',4);txt('MEGA',m.x,m.y-5,13,'#fff');txt('DUMP',m.x,m.y+10,11,'#ffd23f')}}
 // ---------- overlays ----------

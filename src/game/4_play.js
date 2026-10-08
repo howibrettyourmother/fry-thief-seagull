@@ -25,12 +25,12 @@ function bossSay(s){if(boss){boss.say=s;boss.sayT=2.2}}
 function waveEnd(){// gross-out stats card; no-hit waves pay a multiplier
   const pts=score-WV.s0;let bonus=0,mult=1;if(WV.hits===0){noHit++;mult=Math.min(2.5,1.5+0.25*(noHit-1));bonus=Math.round(pts*(mult-1));score+=bonus;setTimeout(()=>say('perfect',2),900)}else noHit=0;
   card={boss:wave===2,rows:[['Butts Bombed',WV.splats],['Fries Yoinked',WV.fries],['Dads Ruined',WV.dads],['Toupees Launched',WV.toupees],['Mega Dumps',WV.megas],['Hits Taken',WV.hits],['Continues (run)',oopsN]],pts,bonus,mult};
-  state='stats';stT=0;shots=shots.filter(s=>s.good&&s.k!=='heart');poops=[];resetInput();saveBest();AUD.SFX.fanfare();say(wave===2?'d'+(lv+1):'wave',3);
+  state='stats';stT=0;shots=shots.filter(s=>s.good&&s.k!=='heart');poops=[];resetInput();saveBest();AUD.SFX.fanfare();setTimeout(()=>AUD.SFX.fart(wave===2?1:[1,7,11],1),900);say(wave===2?'d'+(lv+1):'wave',3);
   if(wave===2){unlockLv=Math.max(unlockLv,Math.min(5,lv+2));LS.set('unlock',unlockLv)}}
 function nextFromStats(){if(wave<2)startWave(wave+1);else if(lv===LEVELS.length-1)finish();else startLevel(lv+1)}
 function finish(){state='win';stT=0;endStats={score,loop,...RUN,cont:oopsN};boss=null;shots=[];AUD.setTheme('win');AUD.SFX.cheer();setTimeout(()=>say('legend',3),500);confetti(120);saveBest()}
 function saveBest(){if(score>best){best=score;LS.set('best'+diff,best)}}
-function oops(){state='oops';stT=0;oopsN++;saveBest();AUD.SFX.fart(3);say('oops',3);resetInput()}
+function oops(){state='oops';stT=0;oopsN++;saveBest();AUD.SFX.fart(9,1);say('oops',3);resetInput()}
 function respawn(){// continue: full hearts, back to the start of this wave (bosses keep their damage = boss checkpoint)
   hearts=maxH();state='play';stT=0;shots=[];poops=[];dogs=[];gull.inv=2;gull.x=110;gull.y=(YMIN()+YMAX())/2;gull.vx=gull.vy=0;fryM=Math.max(fryM,70);hangry=0;
   if(wave===2&&boss){boss.st='fight';boss.at=2;WV.hits=1}else{people=[];umbs=[];cars=[];const s0=WV.s0;startWave(wave);WV.s0=s0;WV.hits=1}}
@@ -56,7 +56,7 @@ const REACT=[['HEY!','hey'],['EWW! BIRD!','gross'],['GROSS!',null],['IT\'S WARM!
 function bubble(p,s){p.say=s;p.sayT=1.7}
 function splatPerson(p,po,mega){p.splat=1;p.mood='mad';WV.splats++;RUN.splats++;combo++;comboT=diff?0.85:1.1;const m=Math.min(8,combo);let pts=50*m;const gy=GY();
   if(m>1)float('x'+m+' COMBO',p.x,gy-145,'#ff5d8f');if(combo===4)say('combo',2);
-  if(!mega){AUD.SFX[R()<0.5?'wet':'splat']();burst(po.x,po.y,10,['#fff','#eeeeee'],150,4)}
+  if(!mega){AUD.SFX[R()<0.5?'wet':'splat']();if(R()<0.2)AUD.SFX.fart([5,0,8,11]);burst(po.x,po.y,10,['#8b5a2b','#5a3517','#c8925a'],150,4)}
   const k=p.k;
   if(k==='toupee'){p.bald=1;debris.push({x:p.x,y:gy-84,vx:rr(-60,60),vy:-420,rot:0,vr:rr(-12,12),c:p.hair,t:0});bubble(p,'MY TOUPEE!');say('toupee',2);WV.toupees++;RUN.toupees++;pts+=100;setTimeout(()=>{p.run=1;p.dir=-1},900)}
   else if(k==='dad'){bubble(p,pick(['MY NEW SHIRT!','HEY!!','NOT AGAIN!']));dadRuined(p,0)}
@@ -70,10 +70,10 @@ function splatPerson(p,po,mega){p.splat=1;p.mood='mad';WV.splats++;RUN.splats++;
   addScore(pts,p.x,gy-112,m>1?'#ffd23f':'#fff')}
 function dadRuined(dd,car){WV.dads++;RUN.dads++;if(car){bubble(dd,'NOT MY NEW CAR!');say('car',3);addScore(200,dd.car.x,GY()-80,'#ffd23f');dd.mood='mad'}
   const kd=dd.kid;if(kd&&!kd.splat&&!kd.run){kd.mood='laugh';setTimeout(()=>{bubble(kd,'HA HA, DAD!');say('laugh',1)},car?1200:700)}}
-function eatFry(n,chili){fries(n);if(chili){chiliT=6;say('chili',3);AUD.SFX.fart(1);float('CHILI CHEESE MODE!',gull.x,gull.y-50,'#ff8f00')}}
+function eatFry(n,chili){fries(n);if(chili){chiliT=6;say('chili',3);AUD.SFX.fart(11,1);float('CHILI CHEESE MODE!',gull.x,gull.y-50,'#ff8f00')}}
 function fries(n){WV.fries+=n;RUN.fries+=n;fryM=Math.min(100,fryM+30*n);if(hangry&&fryM>20){hangry=0}megaN+=n;if(megaN>=megaNeed()&&megaC<2){megaN=0;megaC++;AUD.SFX.charge();float('MEGA DUMP READY!',gull.x,gull.y-60,'#ffd23f')}}
 function stealFries(p){const ch=p.chili;p.fries=0;p.mood='mad';p.arm=-2.4;bubble(p,pick(['MY FRIES!','HEY!','NOOO!','THIEF!']));gull.carry=1.2;gull.munch=0.9;addScore(100,p.x,GY()-120,'#ffd23f');AUD.SFX.munch();
-  burst(gull.x+40,gull.y,12,['#ffd54f','#ffca28','#fff59d'],160,4);if(!ch)say(pick(['mine','myfries','noo','fries','mine','yum']),2);eatFry(1,ch);setTimeout(()=>{p.run=1;p.dir=-1},900)}
+  burst(gull.x+40,gull.y,12,['#ffd54f','#ffca28','#fff59d'],160,4);if(R()<0.35)setTimeout(()=>AUD.SFX.fart([2,10,0]),450);if(!ch)say(pick(['mine','myfries','noo','fries','mine','yum']),2);eatFry(1,ch);setTimeout(()=>{p.run=1;p.dir=-1},900)}
 // ---------- shot patterns ----------
 function lead(t){return{x:gull.x+gull.vx*t*0.8,y:gull.y+gull.vy*t*0.5}}
 function lob(x,y,tx,ty,t,g){return{vx:(tx-x)/t,vy:(ty-y-0.5*g*t*t)/t}}
@@ -151,15 +151,15 @@ function updBoss(dt){const b=boss,def=BOSS[b.k];b.flash=Math.max(0,b.flash-dt);b
   if(b.st==='enter'){b.t+=dt;const tx=W*0.7;b.x=lerp(b.x,tx,Math.min(1,dt*2.2));if(b.k==='bot')def.upd(b,0);if(Math.abs(b.x-tx)<3){b.st='fight';b.at=1.2}return}
   if(b.st==='fight'){def.upd(b,dt);if(R()<dt*0.12)bossSay(pick(def.taunts));return}
   if(b.st==='down'){b.t+=dt;if(R()<0.3)confetti(2);if(b.t>2.8)waveEnd()}}
-function bossHit(po,dmg){const b=boss;b.hp-=dmg;b.hits++;b.flash=0.12;AUD.SFX.bossHit();score+=20*dmg;burst(po.x,po.y,8,['#fff'],120,3);if(b.spl.length<14)b.spl.push([po.x-b.x,po.y-GY()]);
+function bossHit(po,dmg){const b=boss;b.hp-=dmg;b.hits++;b.flash=0.12;AUD.SFX.bossHit();score+=20*dmg;burst(po.x,po.y,8,['#8b5a2b','#5a3517'],120,3);if(R()<0.25)AUD.SFX.fart([2,10,4,0]);if(b.spl.length<14)b.spl.push([po.x-b.x,po.y-GY()]);
   if(b.hits%6===0)shots.push({k:'fry',x:b.x-40,y:GY()-180,vx:rr(-160,-60),vy:-300,g:420,r:10,good:1,life:4});
   const ph=b.hp>b.max*0.66?1:b.hp>b.max*0.33?2:3;if(ph>b.ph&&b.hp>0){b.ph=ph;b.at=1.2;banner={s:'PHASE '+ph+'!',t:0};say('t'+(lv+1),3);bossSay(pick(BOSS[b.k].taunts));AUD.SFX.warn();shake=10}
-  if(b.hp<=0){b.hp=0;b.st='down';b.t=0;shots=shots.filter(s=>s.good);AUD.SFX.bossDown();AUD.SFX.fart(3);addScore(1500,b.x,GY()-260,'#ffe14d');confetti(60);bossSay(['MY WHISTLE IS FULL OF POOP!','THAT\'S NOT MY SECRET SAUCE!','IT SMELLS LIKE A PORTA POTTY!','TOO. MUCH. POOP.','MY HOT DOGS!'][lv])}}
+  if(b.hp<=0){b.hp=0;b.st='down';b.t=0;shots=shots.filter(s=>s.good);AUD.SFX.bossDown();AUD.SFX.fart(3,1);addScore(1500,b.x,GY()-260,'#ffe14d');confetti(60);bossSay(['MY WHISTLE IS FULL OF POOP!','THAT\'S NOT MY SECRET SAUCE!','IT SMELLS LIKE A PORTA POTTY!','TOO. MUCH. POOP.','MY HOT DOGS!'][lv])}}
 // ---------- poop ----------
 function dropPoop(){const ch=chiliT>0;poops.push({x:gull.x-6+(ch?rr(-8,8):0),y:gull.y+14,vx:gull.vx*0.3+(ch?rr(-40,40):0),vy:80,small:ch});gull.cd=ch?0.07:hangry?0.5:0.2;poopN++;
-  if(ch){if((fartT-=1)<=0){AUD.SFX.fart(2);fartT=3}}else{AUD.SFX.plop();if(R()<0.22)AUD.SFX.fart(R()<0.5?2:0);if(poopN===1||R()<0.05)say(pick(['bombs','bombs','splat']),1)}}
-function dropMega(){megaC--;WV.megas++;RUN.megas++;poops.push({x:gull.x-6,y:gull.y+20,vx:gull.vx*0.25,vy:40,mega:1});AUD.SFX.fart(1);say('mega',3);float('MEGA DUMP!',gull.x,gull.y-50,'#ffd23f')}
-function megaBoom(x){const g=GY(),R0=120;shake=16;AUD.SFX.mega();AUD.SFX.fart(3);burst(x,g-20,40,['#fff','#eeeeee','#e0e0e0'],420,8);
+  if(ch){if(T>=fartT){AUD.SFX.fart([6,8,6,5]);fartT=T+0.4}}else{AUD.SFX.plop();if(R()<0.18)AUD.SFX.fart([2,0,4,10]);if(poopN===1||R()<0.05)say(pick(['bombs','bombs','splat']),1)}}
+function dropMega(){megaC--;WV.megas++;RUN.megas++;poops.push({x:gull.x-6,y:gull.y+20,vx:gull.vx*0.25,vy:40,mega:1});AUD.SFX.fart(1,1);say('mega',3);float('MEGA DUMP!',gull.x,gull.y-50,'#ffd23f')}
+function megaBoom(x){const g=GY(),R0=120;shake=16;AUD.SFX.mega();AUD.SFX.fart(3,1);burst(x,g-20,40,['#8b5a2b','#5a3517','#c8925a','#6d4520'],420,8);
   for(const p of people)if(!p.splat&&Math.abs(p.x-x)<R0)splatPerson(p,{x:p.x,y:g-60},1);for(const c of cars)if(Math.abs(c.x-x)<R0+40&&c.splats.length<4){c.splats.push(-20,10,30);if(c.dad)dadRuined(c.dad,1)}
   for(const u of umbs)if(Math.abs(u.x-x)<R0){u.gone=1}for(const d of dogs)if(Math.abs(d.x-x)<R0){d.splat=1;d.life=0}
   if(boss&&boss.st==='fight'&&Math.abs(boss.x-x)<R0+90)bossHit({x:boss.x-20,y:g-160},10);for(let i=0;i<6;i++)decals.push({x:x+rr(-R0,R0),y:g+rr(6,26)})}
@@ -177,7 +177,7 @@ function update(dt){T+=dt;stT+=dt;if(banner){banner.t+=dt;if(banner.t>2.6)banner
   // gull: velocity follows the stick with light inertia (snappy, no lag)
   let ix=0,iy=0;if(DEBUG&&bot.on){ix=bot.vx;iy=bot.vy}else{const m=Math.hypot(joy.dx,joy.dy);if(m>0.1){ix=joy.dx;iy=joy.dy}ix+=(keys.ArrowRight?1:0)-(keys.ArrowLeft?1:0);iy+=(keys.ArrowDown?1:0)-(keys.ArrowUp?1:0);const mm=Math.hypot(ix,iy);if(mm>1){ix/=mm;iy/=mm}}
   const GS=430*(hangry?0.55:1),ka=Math.min(1,dt*16);gull.vx+=(ix*GS-gull.vx)*ka;
-  if(swoopQ){swoopQ=0;if(gull.sw<=0&&gull.swCD<=0){gull.sw=0.56;gull.swCD=0.9;AUD.SFX.whoosh()}}
+  if(swoopQ){swoopQ=0;if(gull.sw<=0&&gull.swCD<=0){gull.sw=0.56;gull.swCD=0.9;AUD.SFX.whoosh();if(R()<0.6)AUD.SFX.fart([7,4])}}
   if(gull.sw>0){gull.sw-=dt;gull.vy=gull.sw>0.28?900:-640}else gull.vy+=(iy*GS-gull.vy)*ka;gull.swCD-=dt;
   gull.x+=gull.vx*dt;gull.y+=gull.vy*dt;if(gull.x<XMIN()){gull.x=XMIN();gull.vx=Math.max(0,gull.vx)}if(gull.x>XMAX()){gull.x=XMAX();gull.vx=Math.min(0,gull.vx)}
   if(gull.y<YMIN()){gull.y=YMIN();gull.vy=Math.max(0,gull.vy)}if(gull.y>YMAX()){gull.y=YMAX();gull.vy=Math.min(0,gull.vy)}
@@ -220,7 +220,7 @@ function update(dt){T+=dt;stT+=dt;if(banner){banner.t+=dt;if(banner.t>2.6)banner
   // shots (hazards + goodies)
   for(const s of shots){s.vy+=(s.g||0)*dt;if(s.ax){s.vx+=s.ax*dt;s.vy+=s.ay*dt}s.x+=s.vx*dt;s.y+=s.vy*dt;s.life-=dt;if(s.bounce&&s.y>g-12){s.y=g-12;s.vy=-s.bounce*(Math.abs(s.x-gull.x)<120?1:0.4)}
     const dd=Math.hypot(s.x-gull.x-8,s.y-gull.y);
-    if(s.good){if(dd<s.r+30){s.dead=1;if(s.k==='heart'){hearts=Math.min(maxH(),hearts+1);AUD.SFX.heart();float('+1 ♥',s.x,s.y,'#ff8fab')}else{gull.munch=0.5;gull.carry=0.6;addScore(25,s.x,s.y,'#ffd23f');AUD.SFX.munch();eatFry(1,s.chili)}}}
+    if(s.good){if(dd<s.r+30){s.dead=1;if(s.k==='heart'){hearts=Math.min(maxH(),hearts+1);AUD.SFX.heart();float('+1 ♥',s.x,s.y,'#ff8fab')}else{gull.munch=0.5;gull.carry=0.6;addScore(25,s.x,s.y,'#ffd23f');AUD.SFX.munch();if(R()<0.35)AUD.SFX.fart([2,10]);eatFry(1,s.chili)}}}
     else if(dd<s.r+16){s.dead=1;burst(s.x,s.y,8,[s.k==='ketchup'?'#d32f2f':s.k==='mustard'?'#fbc02d':'#4fc3f7','#fff'],120,4);hurt()}
     if((!s.bounce&&s.y>g+20)||s.x<-60||s.x>W+80||s.y<-80||s.life<=0)s.dead=1}
   shots=shots.filter(s=>!s.dead);

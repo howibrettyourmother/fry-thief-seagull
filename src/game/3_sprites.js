@@ -30,7 +30,8 @@ function face(x,y,r,mood){circ(x-r*0.35,y-r*0.1,r*0.13,'#222');circ(x+r*0.35,y-r
   else if(mood==='cry'){ell(x,y+r*0.5,r*0.3,r*0.22,'#5d2a1a');X.fillStyle='#4fc3f7';const k=(T*3)%1;for(const sx of [-0.35,0.35]){X.fillRect(x+sx*r-1.5,y,3,r*0.9);circ(x+sx*r,y+r*(0.2+k),2.5,'#81d4fa')}}
   else if(mood==='laugh'){X.moveTo(x-r*0.5,y-r*0.15);X.lineTo(x-r*0.2,y-r*0.15);X.moveTo(x+r*0.2,y-r*0.15);X.lineTo(x+r*0.5,y-r*0.15);strokeL(2,'#222');X.beginPath();X.arc(x,y+r*0.2,r*0.4,0,Math.PI);X.fillStyle='#5d2a1a';X.fill()}
   else{X.arc(x,y+r*0.15,r*0.35,0.2,Math.PI-0.2);strokeL(2,'#222')}}
-function splatOn(x,y,s){X.save();X.translate(x,y);X.scale(s,s);ell(0,0,10,5,'#fff');circ(-7,3,3,'#fff');circ(6,4,3.4,'#fff');X.fillStyle='#fff';X.fillRect(-2,0,3,9);circ(-0.5,9,2.4,'#fff');circ(2,-2,2,'#e0e0e0');X.restore()}
+const PB='#8b5a2b',PD='#5a3517',PH='#c8925a';
+function splatOn(x,y,s){X.save();X.translate(x,y);X.scale(s,s);ell(0,1.5,10.5,5.5,PD);ell(0,0,10,5,PB);circ(-7,3,3,PB);circ(6,4,3.4,PB);X.fillStyle=PB;X.fillRect(-2,0,3,9);circ(-0.5,9.5,2.6,PD);circ(-0.5,9,2.4,PB);ell(-3,-1.5,3.5,1.6,PH);circ(4,1,1.2,PD);X.restore()}
 function drawPerson(p){const g=GY(),x=p.x,kid=p.k==='kid'||p.k==='kidl',s=kid?0.72:1,bob=p.run?Math.abs(Math.sin(T*16))*4:(p.walk?Math.abs(Math.sin(T*8+p.x*0.01))*2:0);
   X.save();X.translate(x,g);if(p.dir<0)X.scale(-1,1);ell(0,2,22*s,5,'rgba(0,0,0,0.15)');
   if(p.k==='sun'&&!p.up){// lying on a towel
@@ -82,10 +83,11 @@ function drawShot(s){const k=s.k;
   else if(k==='fry'){X.save();X.translate(s.x,s.y);X.rotate(T*4);X.fillStyle=s.chili?'#ff8f00':'#ffd54f';X.fillRect(-9,-2.5,18,5);X.strokeStyle='#e0a800';X.lineWidth=1;X.strokeRect(-9,-2.5,18,5);X.restore()}
   else if(k==='heart'){X.save();X.translate(s.x,s.y+Math.sin(T*3)*3);X.fillStyle='#ff4d6d';heartP(0,0,13);X.fill();X.lineWidth=2;X.strokeStyle='#fff';X.stroke();X.restore();X.beginPath();X.moveTo(s.x,s.y+12);X.lineTo(s.x,s.y+30);strokeL(1.5,'#fff')}
   else if(k==='ring'){X.beginPath();X.arc(s.x,s.y,s.r,0,TAU);strokeL(5,'rgba(255,255,255,0.85)')}}
-function drawPoop(p){ell(p.x,p.y,5,6.5,'#fff');circ(p.x-1.5,p.y-2,1.6,'#e0e0e0');circ(p.x+1,p.y+3,1.4,'#bdbdbd')}
+function drawPoop(p){const k=p.small?0.75:1;X.save();X.translate(p.x,p.y);X.scale(k,k);ell(0,1,5.5,6.5,PD);ell(-0.5,0,5,6,PB);poly([-2.5,-4,0,-10,2.5,-4],PB);ell(-2,-1.5,1.6,2.4,PH);X.restore()}
 
 function drawCar(c){const g=GY(),x=c.x;ell(x,g+2,58,6,'rgba(0,0,0,0.15)');X.fillStyle=c.c;rrect(x-58,g-34,116,24,10);X.fill();X.beginPath();X.moveTo(x-30,g-32);X.quadraticCurveTo(x-10,g-50,x+20,g-34);X.fillStyle=c.c;X.fill();
   X.fillStyle='rgba(180,230,255,0.8)';poly([x-26,g-36,x-14,g-50,x-8,g-50,x-14,g-36],'rgba(180,230,255,0.85)');circ(x-36,g-10,11,'#263238');circ(x+36,g-10,11,'#263238');circ(x-36,g-10,5,'#cfd8dc');circ(x+36,g-10,5,'#cfd8dc');
   circ(x-56,g-24,4,'#fff59d');X.fillStyle='rgba(255,255,255,0.5)';X.fillRect(x-48,g-30,90,3);txt('NEW!',x+30,g-22,10,'#fff');for(const s of c.splats)splatOn(x+s,g-36,0.8)}
-function drawMega(p){X.save();X.translate(p.x,p.y);X.scale(2.4,2.4);ell(0,4,11,6,'#fff');ell(0,-2,8,5,'#f5f5f5');ell(0,-7,5,4,'#fff');poly([-2,-10,0,-15,2,-10],'#fff');X.beginPath();X.arc(0,1,7,0.3,2.8);strokeL(1,'#bdbdbd');X.restore()}
+function poopSwirl(){ell(0,5,11.5,6.5,PD);ell(0,4,11,6,PB);ell(0,-1.5,8.5,5.5,PD);ell(0,-2,8,5,PB);ell(0,-6.5,5.5,4.2,PD);ell(0,-7,5,4,PB);poly([-2.2,-10,0,-15,2.2,-10],PB);ell(-5,2,3,1.6,PH);ell(-3,-3.5,2.2,1.2,PH);ell(-1.5,-8,1.4,1,PH)}
+function drawMega(p){X.save();X.translate(p.x,p.y);X.scale(2.4,2.4);poopSwirl();X.restore()}
 function drawToupee(t){X.save();X.translate(t.x,t.y);X.rotate(t.rot);X.fillStyle=t.c;X.beginPath();X.ellipse(0,0,13,5,0,0,TAU);X.fill();poly([8,-2,18,2,9,3],t.c);X.restore()}

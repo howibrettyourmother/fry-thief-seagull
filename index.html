@@ -50,6 +50,28 @@ const AUD=(()=>{
   function n(t,d,out){const s=C.createBufferSource();s.buffer=noiseBuf;s.loop=true;s.connect(out);s.start(t,R());s.stop(t+d+0.05);return s}
   const mtof=m=>440*Math.pow(2,(m-69)/12);
   const blip=(type,f0,f1,t,d,v,out)=>{const G=g(0,out||sfxBus);env(G,t,0.004,d*0.3,d*0.7,v);const x=o(type,f0,t,d,f('lowpass',5000,0.7,G));x.frequency.exponentialRampToValueAtTime(f1,t+d);return x};
+  // ---------- fart machine: 12 synthesized varieties, rate-limited so old iPhones never get audio spam ----------
+  let fNext=0,fTimes=[];
+  function blat(t,f0,f1,d,lfo,depth,lp,q,nz,v,type){const G=g(0,sfxBus);env(G,t,0.008,d*0.6,d*0.38,v);const F=f('lowpass',lp,q,G);
+    const x=o(type||'sawtooth',f0,t,d,F);x.frequency.setValueAtTime(f0,t);x.frequency.linearRampToValueAtTime(f1,t+d);
+    if(lfo){const L=C.createOscillator(),LG=C.createGain();L.frequency.value=lfo;LG.gain.value=f0*depth;L.connect(LG);LG.connect(x.frequency);L.start(t);L.stop(t+d+0.05)}
+    if(nz){const N=g(0,sfxBus);env(N,t,0.008,d*0.5,d*0.4,v*nz);n(t,d,f('lowpass',lp*0.6,1,N))}}
+  const FARTS=[
+    t=>blat(t,95,70,0.32,24,0.35,650,2.5,0.35,0.26),                                   // 0 classic
+    t=>{blat(t,170,210,0.45,9,0.12,1400,3,0.1,0.2);blat(t+0.42,210,120,0.6,11,0.18,1200,3,0.15,0.2)}, // 1 long trumpet
+    t=>blat(t,250,300,0.09,40,0.2,1500,2,0.2,0.2),                                     // 2 tiny toot
+    t=>blat(t,58,42,1.1,11,0.45,380,2,0.6,0.32),                                       // 3 big rumbly
+    t=>blat(t,420,620,0.35,38,0.12,2600,6,0.05,0.12,'square'),                         // 4 squeaky
+    t=>{blat(t,80,60,0.25,30,0.5,500,1.5,1.2,0.22);for(let i=0;i<4;i++)blip('sine',rr(300,700),rr(120,250),t+0.04+i*0.05,0.05,0.06)}, // 5 wet
+    t=>{for(let i=0;i<8;i++)blat(t+i*0.065,rr(110,150),90,0.05,0,0,900,2,0.3,0.2)},    // 6 machine-gun
+    t=>{const G=g(0,sfxBus);env(G,t,0.02,0.6,0.2,0.12);const x=o('triangle',200,t,0.85,G);x.frequency.linearRampToValueAtTime(700,t+0.35);x.frequency.linearRampToValueAtTime(150,t+0.8);blat(t+0.6,90,60,0.25,26,0.4,600,2,0.3,0.2)}, // 7 slide-whistle
+    t=>{for(let i=0;i<5;i++){const s=t+i*0.09+rr(0,0.04);blat(s,rr(80,180),rr(60,120),rr(0.04,0.1),30,0.3,800,2,0.4,0.2)}}, // 8 sputter
+    t=>blat(t,170,55,0.75,14,0.25,900,3,0.2,0.24),                                     // 9 sad trombone
+    t=>{blat(t,140,160,0.08,30,0.2,1200,2,0.2,0.2);blat(t+0.13,120,100,0.14,30,0.25,1000,2,0.2,0.22)}, // 10 double toot
+    t=>{blat(t,300,700,0.22,30,0.1,2400,5,0.05,0.1,'square');blat(t+0.2,75,55,0.4,22,0.45,550,2,0.5,0.28)} // 11 squeal-then-blat
+  ];
+  function fartPlay(k,force){const t=now();if(t<fNext)return;fTimes=fTimes.filter(x=>t-x<1);if(fTimes.length>=(force?5:3))return;fNext=t+0.12;fTimes.push(t);
+    k=k==null?(R()*FARTS.length)|0:Array.isArray(k)?k[(R()*k.length)|0]:k;FARTS[k](t);stats.farts=(stats.farts||0)+1}
   // ---------- SFX (all original synth) ----------
   let lastShot=0;
   const SFX={
@@ -83,9 +105,7 @@ const AUD=(()=>{
     munch:safe(()=>{const t=now();for(let i=0;i<3;i++){const G=g(0,sfxBus);env(G,t+i*0.09,0.002,0.02,0.05,0.22);n(t+i*0.09,0.08,f('bandpass',1800-i*300,1.2,G))}blip('triangle',mtof(84),mtof(91),t+0.28,0.1,0.06)}),
     whistle:safe(()=>{const t=now(),G=g(0,sfxBus);env(G,t,0.01,0.35,0.12,0.09);const x=o('sine',2300,t,0.5,G);const L=C.createOscillator(),LG=C.createGain();L.frequency.value=28;LG.gain.value=120;L.connect(LG);LG.connect(x.frequency);L.start(t);L.stop(t+0.55)}),
     honk:safe(()=>{const t=now();[0,0.22].forEach((d,i)=>{const G=g(0,sfxBus);env(G,t+d,0.01,0.14,0.05,0.07);o('square',i?233:311,t+d,0.2,f('lowpass',1600,1,G));o('square',i?175:233,t+d,0.2,f('lowpass',1600,1,G))})}),
-    fart:safe((k)=>{const t=now();k=k==null?(R()*4)|0:k;const d=[0.32,0.6,0.16,0.9][k],f0=[95,72,140,60][k],G=g(0,sfxBus);env(G,t,0.01,d*0.6,d*0.35,0.3);const F=f('lowpass',[650,480,900,420][k],2.5,G);
-      const x=o('sawtooth',f0,t,d,F);x.frequency.linearRampToValueAtTime(f0*(k===2?1.6:0.7),t+d);const L=C.createOscillator(),LG=C.createGain();L.frequency.value=[24,17,32,12][k];LG.gain.value=f0*0.35;L.connect(LG);LG.connect(x.frequency);L.start(t);L.stop(t+d+0.05);
-      const N=g(0,sfxBus);env(N,t,0.01,d*0.5,d*0.4,0.1);n(t,d,f('lowpass',300,1,N))}),
+    fart:safe((k,force)=>fartPlay(k,force)),
     wet:safe(()=>{const t=now(),G=g(0,sfxBus);env(G,t,0.001,0.04,0.2,0.34);const F=f('bandpass',900,1.4,G);n(t,0.28,F);F.frequency.exponentialRampToValueAtTime(220,t+0.25);
       for(let i=0;i<4;i++){const s=t+0.05+i*0.04+rr(0,0.03);blip('sine',rr(500,900),rr(150,300),s,0.06,0.07)}}),
     mega:safe(()=>{const t=now(),G=g(0,sfxBus);env(G,t,0.002,0.25,0.9,0.5);n(t,1.2,f('lowpass',500,0.8,G));const B=g(0,sfxBus);env(B,t,0.002,0.1,0.5,0.4);const x=o('sine',140,t,0.7,B);x.frequency.exponentialRampToValueAtTime(30,t+0.6)}),
@@ -319,7 +339,8 @@ function face(x,y,r,mood){circ(x-r*0.35,y-r*0.1,r*0.13,'#222');circ(x+r*0.35,y-r
   else if(mood==='cry'){ell(x,y+r*0.5,r*0.3,r*0.22,'#5d2a1a');X.fillStyle='#4fc3f7';const k=(T*3)%1;for(const sx of [-0.35,0.35]){X.fillRect(x+sx*r-1.5,y,3,r*0.9);circ(x+sx*r,y+r*(0.2+k),2.5,'#81d4fa')}}
   else if(mood==='laugh'){X.moveTo(x-r*0.5,y-r*0.15);X.lineTo(x-r*0.2,y-r*0.15);X.moveTo(x+r*0.2,y-r*0.15);X.lineTo(x+r*0.5,y-r*0.15);strokeL(2,'#222');X.beginPath();X.arc(x,y+r*0.2,r*0.4,0,Math.PI);X.fillStyle='#5d2a1a';X.fill()}
   else{X.arc(x,y+r*0.15,r*0.35,0.2,Math.PI-0.2);strokeL(2,'#222')}}
-function splatOn(x,y,s){X.save();X.translate(x,y);X.scale(s,s);ell(0,0,10,5,'#fff');circ(-7,3,3,'#fff');circ(6,4,3.4,'#fff');X.fillStyle='#fff';X.fillRect(-2,0,3,9);circ(-0.5,9,2.4,'#fff');circ(2,-2,2,'#e0e0e0');X.restore()}
+const PB='#8b5a2b',PD='#5a3517',PH='#c8925a';
+function splatOn(x,y,s){X.save();X.translate(x,y);X.scale(s,s);ell(0,1.5,10.5,5.5,PD);ell(0,0,10,5,PB);circ(-7,3,3,PB);circ(6,4,3.4,PB);X.fillStyle=PB;X.fillRect(-2,0,3,9);circ(-0.5,9.5,2.6,PD);circ(-0.5,9,2.4,PB);ell(-3,-1.5,3.5,1.6,PH);circ(4,1,1.2,PD);X.restore()}
 function drawPerson(p){const g=GY(),x=p.x,kid=p.k==='kid'||p.k==='kidl',s=kid?0.72:1,bob=p.run?Math.abs(Math.sin(T*16))*4:(p.walk?Math.abs(Math.sin(T*8+p.x*0.01))*2:0);
   X.save();X.translate(x,g);if(p.dir<0)X.scale(-1,1);ell(0,2,22*s,5,'rgba(0,0,0,0.15)');
   if(p.k==='sun'&&!p.up){// lying on a towel
@@ -371,12 +392,13 @@ function drawShot(s){const k=s.k;
   else if(k==='fry'){X.save();X.translate(s.x,s.y);X.rotate(T*4);X.fillStyle=s.chili?'#ff8f00':'#ffd54f';X.fillRect(-9,-2.5,18,5);X.strokeStyle='#e0a800';X.lineWidth=1;X.strokeRect(-9,-2.5,18,5);X.restore()}
   else if(k==='heart'){X.save();X.translate(s.x,s.y+Math.sin(T*3)*3);X.fillStyle='#ff4d6d';heartP(0,0,13);X.fill();X.lineWidth=2;X.strokeStyle='#fff';X.stroke();X.restore();X.beginPath();X.moveTo(s.x,s.y+12);X.lineTo(s.x,s.y+30);strokeL(1.5,'#fff')}
   else if(k==='ring'){X.beginPath();X.arc(s.x,s.y,s.r,0,TAU);strokeL(5,'rgba(255,255,255,0.85)')}}
-function drawPoop(p){ell(p.x,p.y,5,6.5,'#fff');circ(p.x-1.5,p.y-2,1.6,'#e0e0e0');circ(p.x+1,p.y+3,1.4,'#bdbdbd')}
+function drawPoop(p){const k=p.small?0.75:1;X.save();X.translate(p.x,p.y);X.scale(k,k);ell(0,1,5.5,6.5,PD);ell(-0.5,0,5,6,PB);poly([-2.5,-4,0,-10,2.5,-4],PB);ell(-2,-1.5,1.6,2.4,PH);X.restore()}
 
 function drawCar(c){const g=GY(),x=c.x;ell(x,g+2,58,6,'rgba(0,0,0,0.15)');X.fillStyle=c.c;rrect(x-58,g-34,116,24,10);X.fill();X.beginPath();X.moveTo(x-30,g-32);X.quadraticCurveTo(x-10,g-50,x+20,g-34);X.fillStyle=c.c;X.fill();
   X.fillStyle='rgba(180,230,255,0.8)';poly([x-26,g-36,x-14,g-50,x-8,g-50,x-14,g-36],'rgba(180,230,255,0.85)');circ(x-36,g-10,11,'#263238');circ(x+36,g-10,11,'#263238');circ(x-36,g-10,5,'#cfd8dc');circ(x+36,g-10,5,'#cfd8dc');
   circ(x-56,g-24,4,'#fff59d');X.fillStyle='rgba(255,255,255,0.5)';X.fillRect(x-48,g-30,90,3);txt('NEW!',x+30,g-22,10,'#fff');for(const s of c.splats)splatOn(x+s,g-36,0.8)}
-function drawMega(p){X.save();X.translate(p.x,p.y);X.scale(2.4,2.4);ell(0,4,11,6,'#fff');ell(0,-2,8,5,'#f5f5f5');ell(0,-7,5,4,'#fff');poly([-2,-10,0,-15,2,-10],'#fff');X.beginPath();X.arc(0,1,7,0.3,2.8);strokeL(1,'#bdbdbd');X.restore()}
+function poopSwirl(){ell(0,5,11.5,6.5,PD);ell(0,4,11,6,PB);ell(0,-1.5,8.5,5.5,PD);ell(0,-2,8,5,PB);ell(0,-6.5,5.5,4.2,PD);ell(0,-7,5,4,PB);poly([-2.2,-10,0,-15,2.2,-10],PB);ell(-5,2,3,1.6,PH);ell(-3,-3.5,2.2,1.2,PH);ell(-1.5,-8,1.4,1,PH)}
+function drawMega(p){X.save();X.translate(p.x,p.y);X.scale(2.4,2.4);poopSwirl();X.restore()}
 function drawToupee(t){X.save();X.translate(t.x,t.y);X.rotate(t.rot);X.fillStyle=t.c;X.beginPath();X.ellipse(0,0,13,5,0,0,TAU);X.fill();poly([8,-2,18,2,9,3],t.c);X.restore()}
 
 // ================= game state, waves, poop physics, fry stealing, hazards, bosses =================
@@ -406,12 +428,12 @@ function bossSay(s){if(boss){boss.say=s;boss.sayT=2.2}}
 function waveEnd(){// gross-out stats card; no-hit waves pay a multiplier
   const pts=score-WV.s0;let bonus=0,mult=1;if(WV.hits===0){noHit++;mult=Math.min(2.5,1.5+0.25*(noHit-1));bonus=Math.round(pts*(mult-1));score+=bonus;setTimeout(()=>say('perfect',2),900)}else noHit=0;
   card={boss:wave===2,rows:[['Butts Bombed',WV.splats],['Fries Yoinked',WV.fries],['Dads Ruined',WV.dads],['Toupees Launched',WV.toupees],['Mega Dumps',WV.megas],['Hits Taken',WV.hits],['Continues (run)',oopsN]],pts,bonus,mult};
-  state='stats';stT=0;shots=shots.filter(s=>s.good&&s.k!=='heart');poops=[];resetInput();saveBest();AUD.SFX.fanfare();say(wave===2?'d'+(lv+1):'wave',3);
+  state='stats';stT=0;shots=shots.filter(s=>s.good&&s.k!=='heart');poops=[];resetInput();saveBest();AUD.SFX.fanfare();setTimeout(()=>AUD.SFX.fart(wave===2?1:[1,7,11],1),900);say(wave===2?'d'+(lv+1):'wave',3);
   if(wave===2){unlockLv=Math.max(unlockLv,Math.min(5,lv+2));LS.set('unlock',unlockLv)}}
 function nextFromStats(){if(wave<2)startWave(wave+1);else if(lv===LEVELS.length-1)finish();else startLevel(lv+1)}
 function finish(){state='win';stT=0;endStats={score,loop,...RUN,cont:oopsN};boss=null;shots=[];AUD.setTheme('win');AUD.SFX.cheer();setTimeout(()=>say('legend',3),500);confetti(120);saveBest()}
 function saveBest(){if(score>best){best=score;LS.set('best'+diff,best)}}
-function oops(){state='oops';stT=0;oopsN++;saveBest();AUD.SFX.fart(3);say('oops',3);resetInput()}
+function oops(){state='oops';stT=0;oopsN++;saveBest();AUD.SFX.fart(9,1);say('oops',3);resetInput()}
 function respawn(){// continue: full hearts, back to the start of this wave (bosses keep their damage = boss checkpoint)
   hearts=maxH();state='play';stT=0;shots=[];poops=[];dogs=[];gull.inv=2;gull.x=110;gull.y=(YMIN()+YMAX())/2;gull.vx=gull.vy=0;fryM=Math.max(fryM,70);hangry=0;
   if(wave===2&&boss){boss.st='fight';boss.at=2;WV.hits=1}else{people=[];umbs=[];cars=[];const s0=WV.s0;startWave(wave);WV.s0=s0;WV.hits=1}}
@@ -437,7 +459,7 @@ const REACT=[['HEY!','hey'],['EWW! BIRD!','gross'],['GROSS!',null],['IT\'S WARM!
 function bubble(p,s){p.say=s;p.sayT=1.7}
 function splatPerson(p,po,mega){p.splat=1;p.mood='mad';WV.splats++;RUN.splats++;combo++;comboT=diff?0.85:1.1;const m=Math.min(8,combo);let pts=50*m;const gy=GY();
   if(m>1)float('x'+m+' COMBO',p.x,gy-145,'#ff5d8f');if(combo===4)say('combo',2);
-  if(!mega){AUD.SFX[R()<0.5?'wet':'splat']();burst(po.x,po.y,10,['#fff','#eeeeee'],150,4)}
+  if(!mega){AUD.SFX[R()<0.5?'wet':'splat']();if(R()<0.2)AUD.SFX.fart([5,0,8,11]);burst(po.x,po.y,10,['#8b5a2b','#5a3517','#c8925a'],150,4)}
   const k=p.k;
   if(k==='toupee'){p.bald=1;debris.push({x:p.x,y:gy-84,vx:rr(-60,60),vy:-420,rot:0,vr:rr(-12,12),c:p.hair,t:0});bubble(p,'MY TOUPEE!');say('toupee',2);WV.toupees++;RUN.toupees++;pts+=100;setTimeout(()=>{p.run=1;p.dir=-1},900)}
   else if(k==='dad'){bubble(p,pick(['MY NEW SHIRT!','HEY!!','NOT AGAIN!']));dadRuined(p,0)}
@@ -451,10 +473,10 @@ function splatPerson(p,po,mega){p.splat=1;p.mood='mad';WV.splats++;RUN.splats++;
   addScore(pts,p.x,gy-112,m>1?'#ffd23f':'#fff')}
 function dadRuined(dd,car){WV.dads++;RUN.dads++;if(car){bubble(dd,'NOT MY NEW CAR!');say('car',3);addScore(200,dd.car.x,GY()-80,'#ffd23f');dd.mood='mad'}
   const kd=dd.kid;if(kd&&!kd.splat&&!kd.run){kd.mood='laugh';setTimeout(()=>{bubble(kd,'HA HA, DAD!');say('laugh',1)},car?1200:700)}}
-function eatFry(n,chili){fries(n);if(chili){chiliT=6;say('chili',3);AUD.SFX.fart(1);float('CHILI CHEESE MODE!',gull.x,gull.y-50,'#ff8f00')}}
+function eatFry(n,chili){fries(n);if(chili){chiliT=6;say('chili',3);AUD.SFX.fart(11,1);float('CHILI CHEESE MODE!',gull.x,gull.y-50,'#ff8f00')}}
 function fries(n){WV.fries+=n;RUN.fries+=n;fryM=Math.min(100,fryM+30*n);if(hangry&&fryM>20){hangry=0}megaN+=n;if(megaN>=megaNeed()&&megaC<2){megaN=0;megaC++;AUD.SFX.charge();float('MEGA DUMP READY!',gull.x,gull.y-60,'#ffd23f')}}
 function stealFries(p){const ch=p.chili;p.fries=0;p.mood='mad';p.arm=-2.4;bubble(p,pick(['MY FRIES!','HEY!','NOOO!','THIEF!']));gull.carry=1.2;gull.munch=0.9;addScore(100,p.x,GY()-120,'#ffd23f');AUD.SFX.munch();
-  burst(gull.x+40,gull.y,12,['#ffd54f','#ffca28','#fff59d'],160,4);if(!ch)say(pick(['mine','myfries','noo','fries','mine','yum']),2);eatFry(1,ch);setTimeout(()=>{p.run=1;p.dir=-1},900)}
+  burst(gull.x+40,gull.y,12,['#ffd54f','#ffca28','#fff59d'],160,4);if(R()<0.35)setTimeout(()=>AUD.SFX.fart([2,10,0]),450);if(!ch)say(pick(['mine','myfries','noo','fries','mine','yum']),2);eatFry(1,ch);setTimeout(()=>{p.run=1;p.dir=-1},900)}
 // ---------- shot patterns ----------
 function lead(t){return{x:gull.x+gull.vx*t*0.8,y:gull.y+gull.vy*t*0.5}}
 function lob(x,y,tx,ty,t,g){return{vx:(tx-x)/t,vy:(ty-y-0.5*g*t*t)/t}}
@@ -532,15 +554,15 @@ function updBoss(dt){const b=boss,def=BOSS[b.k];b.flash=Math.max(0,b.flash-dt);b
   if(b.st==='enter'){b.t+=dt;const tx=W*0.7;b.x=lerp(b.x,tx,Math.min(1,dt*2.2));if(b.k==='bot')def.upd(b,0);if(Math.abs(b.x-tx)<3){b.st='fight';b.at=1.2}return}
   if(b.st==='fight'){def.upd(b,dt);if(R()<dt*0.12)bossSay(pick(def.taunts));return}
   if(b.st==='down'){b.t+=dt;if(R()<0.3)confetti(2);if(b.t>2.8)waveEnd()}}
-function bossHit(po,dmg){const b=boss;b.hp-=dmg;b.hits++;b.flash=0.12;AUD.SFX.bossHit();score+=20*dmg;burst(po.x,po.y,8,['#fff'],120,3);if(b.spl.length<14)b.spl.push([po.x-b.x,po.y-GY()]);
+function bossHit(po,dmg){const b=boss;b.hp-=dmg;b.hits++;b.flash=0.12;AUD.SFX.bossHit();score+=20*dmg;burst(po.x,po.y,8,['#8b5a2b','#5a3517'],120,3);if(R()<0.25)AUD.SFX.fart([2,10,4,0]);if(b.spl.length<14)b.spl.push([po.x-b.x,po.y-GY()]);
   if(b.hits%6===0)shots.push({k:'fry',x:b.x-40,y:GY()-180,vx:rr(-160,-60),vy:-300,g:420,r:10,good:1,life:4});
   const ph=b.hp>b.max*0.66?1:b.hp>b.max*0.33?2:3;if(ph>b.ph&&b.hp>0){b.ph=ph;b.at=1.2;banner={s:'PHASE '+ph+'!',t:0};say('t'+(lv+1),3);bossSay(pick(BOSS[b.k].taunts));AUD.SFX.warn();shake=10}
-  if(b.hp<=0){b.hp=0;b.st='down';b.t=0;shots=shots.filter(s=>s.good);AUD.SFX.bossDown();AUD.SFX.fart(3);addScore(1500,b.x,GY()-260,'#ffe14d');confetti(60);bossSay(['MY WHISTLE IS FULL OF POOP!','THAT\'S NOT MY SECRET SAUCE!','IT SMELLS LIKE A PORTA POTTY!','TOO. MUCH. POOP.','MY HOT DOGS!'][lv])}}
+  if(b.hp<=0){b.hp=0;b.st='down';b.t=0;shots=shots.filter(s=>s.good);AUD.SFX.bossDown();AUD.SFX.fart(3,1);addScore(1500,b.x,GY()-260,'#ffe14d');confetti(60);bossSay(['MY WHISTLE IS FULL OF POOP!','THAT\'S NOT MY SECRET SAUCE!','IT SMELLS LIKE A PORTA POTTY!','TOO. MUCH. POOP.','MY HOT DOGS!'][lv])}}
 // ---------- poop ----------
 function dropPoop(){const ch=chiliT>0;poops.push({x:gull.x-6+(ch?rr(-8,8):0),y:gull.y+14,vx:gull.vx*0.3+(ch?rr(-40,40):0),vy:80,small:ch});gull.cd=ch?0.07:hangry?0.5:0.2;poopN++;
-  if(ch){if((fartT-=1)<=0){AUD.SFX.fart(2);fartT=3}}else{AUD.SFX.plop();if(R()<0.22)AUD.SFX.fart(R()<0.5?2:0);if(poopN===1||R()<0.05)say(pick(['bombs','bombs','splat']),1)}}
-function dropMega(){megaC--;WV.megas++;RUN.megas++;poops.push({x:gull.x-6,y:gull.y+20,vx:gull.vx*0.25,vy:40,mega:1});AUD.SFX.fart(1);say('mega',3);float('MEGA DUMP!',gull.x,gull.y-50,'#ffd23f')}
-function megaBoom(x){const g=GY(),R0=120;shake=16;AUD.SFX.mega();AUD.SFX.fart(3);burst(x,g-20,40,['#fff','#eeeeee','#e0e0e0'],420,8);
+  if(ch){if(T>=fartT){AUD.SFX.fart([6,8,6,5]);fartT=T+0.4}}else{AUD.SFX.plop();if(R()<0.18)AUD.SFX.fart([2,0,4,10]);if(poopN===1||R()<0.05)say(pick(['bombs','bombs','splat']),1)}}
+function dropMega(){megaC--;WV.megas++;RUN.megas++;poops.push({x:gull.x-6,y:gull.y+20,vx:gull.vx*0.25,vy:40,mega:1});AUD.SFX.fart(1,1);say('mega',3);float('MEGA DUMP!',gull.x,gull.y-50,'#ffd23f')}
+function megaBoom(x){const g=GY(),R0=120;shake=16;AUD.SFX.mega();AUD.SFX.fart(3,1);burst(x,g-20,40,['#8b5a2b','#5a3517','#c8925a','#6d4520'],420,8);
   for(const p of people)if(!p.splat&&Math.abs(p.x-x)<R0)splatPerson(p,{x:p.x,y:g-60},1);for(const c of cars)if(Math.abs(c.x-x)<R0+40&&c.splats.length<4){c.splats.push(-20,10,30);if(c.dad)dadRuined(c.dad,1)}
   for(const u of umbs)if(Math.abs(u.x-x)<R0){u.gone=1}for(const d of dogs)if(Math.abs(d.x-x)<R0){d.splat=1;d.life=0}
   if(boss&&boss.st==='fight'&&Math.abs(boss.x-x)<R0+90)bossHit({x:boss.x-20,y:g-160},10);for(let i=0;i<6;i++)decals.push({x:x+rr(-R0,R0),y:g+rr(6,26)})}
@@ -558,7 +580,7 @@ function update(dt){T+=dt;stT+=dt;if(banner){banner.t+=dt;if(banner.t>2.6)banner
   // gull: velocity follows the stick with light inertia (snappy, no lag)
   let ix=0,iy=0;if(DEBUG&&bot.on){ix=bot.vx;iy=bot.vy}else{const m=Math.hypot(joy.dx,joy.dy);if(m>0.1){ix=joy.dx;iy=joy.dy}ix+=(keys.ArrowRight?1:0)-(keys.ArrowLeft?1:0);iy+=(keys.ArrowDown?1:0)-(keys.ArrowUp?1:0);const mm=Math.hypot(ix,iy);if(mm>1){ix/=mm;iy/=mm}}
   const GS=430*(hangry?0.55:1),ka=Math.min(1,dt*16);gull.vx+=(ix*GS-gull.vx)*ka;
-  if(swoopQ){swoopQ=0;if(gull.sw<=0&&gull.swCD<=0){gull.sw=0.56;gull.swCD=0.9;AUD.SFX.whoosh()}}
+  if(swoopQ){swoopQ=0;if(gull.sw<=0&&gull.swCD<=0){gull.sw=0.56;gull.swCD=0.9;AUD.SFX.whoosh();if(R()<0.6)AUD.SFX.fart([7,4])}}
   if(gull.sw>0){gull.sw-=dt;gull.vy=gull.sw>0.28?900:-640}else gull.vy+=(iy*GS-gull.vy)*ka;gull.swCD-=dt;
   gull.x+=gull.vx*dt;gull.y+=gull.vy*dt;if(gull.x<XMIN()){gull.x=XMIN();gull.vx=Math.max(0,gull.vx)}if(gull.x>XMAX()){gull.x=XMAX();gull.vx=Math.min(0,gull.vx)}
   if(gull.y<YMIN()){gull.y=YMIN();gull.vy=Math.max(0,gull.vy)}if(gull.y>YMAX()){gull.y=YMAX();gull.vy=Math.min(0,gull.vy)}
@@ -601,7 +623,7 @@ function update(dt){T+=dt;stT+=dt;if(banner){banner.t+=dt;if(banner.t>2.6)banner
   // shots (hazards + goodies)
   for(const s of shots){s.vy+=(s.g||0)*dt;if(s.ax){s.vx+=s.ax*dt;s.vy+=s.ay*dt}s.x+=s.vx*dt;s.y+=s.vy*dt;s.life-=dt;if(s.bounce&&s.y>g-12){s.y=g-12;s.vy=-s.bounce*(Math.abs(s.x-gull.x)<120?1:0.4)}
     const dd=Math.hypot(s.x-gull.x-8,s.y-gull.y);
-    if(s.good){if(dd<s.r+30){s.dead=1;if(s.k==='heart'){hearts=Math.min(maxH(),hearts+1);AUD.SFX.heart();float('+1 ♥',s.x,s.y,'#ff8fab')}else{gull.munch=0.5;gull.carry=0.6;addScore(25,s.x,s.y,'#ffd23f');AUD.SFX.munch();eatFry(1,s.chili)}}}
+    if(s.good){if(dd<s.r+30){s.dead=1;if(s.k==='heart'){hearts=Math.min(maxH(),hearts+1);AUD.SFX.heart();float('+1 ♥',s.x,s.y,'#ff8fab')}else{gull.munch=0.5;gull.carry=0.6;addScore(25,s.x,s.y,'#ffd23f');AUD.SFX.munch();if(R()<0.35)AUD.SFX.fart([2,10]);eatFry(1,s.chili)}}}
     else if(dd<s.r+16){s.dead=1;burst(s.x,s.y,8,[s.k==='ketchup'?'#d32f2f':s.k==='mustard'?'#fbc02d':'#4fc3f7','#fff'],120,4);hurt()}
     if((!s.bounce&&s.y>g+20)||s.x<-60||s.x>W+80||s.y<-80||s.life<=0)s.dead=1}
   shots=shots.filter(s=>!s.dead);
@@ -612,7 +634,7 @@ let UI=[],HUDB=[];
 function btn(id,x,y,w,h,fn){UI.push({id,x,y,w,h,fn})}
 function hbtn(id,x,y,w,h,fn){HUDB.push({id,x,y,w,h,fn})}
 function uiTap(p){for(const b of UI)if(inR(p,b)){AUD.SFX.click();b.fn();return}
-  if(state==='card'&&stT>0.4)startPlay();else if(state==='stats'&&stT>1.2)nextFromStats();else if(state==='oops'&&stT>1.2)respawn();else if(state==='win'){AUD.SFX.fart();burst(p.x,p.y,30,['#ffd23f','#ff5d8f','#4fc3f7','#fff','#81c784'],260,6)}}
+  if(state==='card'&&stT>0.4)startPlay();else if(state==='stats'&&stT>1.2)nextFromStats();else if(state==='oops'&&stT>1.2)respawn();else if(state==='win'){AUD.SFX.fart(null,1);burst(p.x,p.y,30,['#ffd23f','#ff5d8f','#4fc3f7','#fff','#81c784'],260,6)}}
 function uiKey(){if(state==='title')newGame(selLv);else if(state==='card')startPlay();else if(state==='stats'&&stT>1.2)nextFromStats();else if(state==='oops'&&stT>1.2)respawn()}
 function goTitle(){saveBest();state='title';paused=false;clearWorld();resetInput();AUD.setTheme('title');selLv=Math.min(selLv,unlockLv-1)}
 // ---------- world ----------
@@ -634,7 +656,7 @@ function drawWorld(){drawBackdrop(lv);const g=GY();
   if(state==='play'||state==='card'||state==='oops'){
     if(state==='play'){const dy=g-60-gull.y,t=dy>0?(-80+Math.sqrt(6400+2200*dy))/1100:0,lx=gull.x-6+gull.vx*0.3*t;X.globalAlpha=0.4+0.12*Math.sin(T*6);ell(lx,g+6,16,5,'#fff');X.beginPath();X.ellipse(lx,g+6,16,5,0,0,TAU);strokeL(2,'#0d47a1');X.globalAlpha=1}
     ell(gull.x,g+8,22*(0.4+0.6*(gull.y/g)),5,'rgba(0,0,0,0.12)');drawGull(gull.x,gull.y,{flap:gull.flap,tilt:gull.tilt,inv:gull.inv>0,carry:gull.carry>0,munch:gull.munch});
-    if(chiliT>0)for(let i=0;i<2;i++)circ(gull.x-34+rr(-4,4),gull.y+6+rr(-4,4),rr(3,6),'rgba(160,140,90,0.35)');
+    if(chiliT>0)for(let i=0;i<2;i++)circ(gull.x-34+rr(-4,4),gull.y+6+rr(-4,4),rr(3,6),'rgba(110,70,30,0.45)');
     if(hangry)txt('HANGRY',gull.x,gull.y-34,13,'#ff5252',{st:'#fff',sw:3})}
   drawParts()}
 function drawParts(){for(const p of parts){const k=1-p.t/p.life;X.globalAlpha=Math.min(1,k*2);if(p.conf){X.save();X.translate(p.x,p.y);X.rotate(p.rot);X.fillStyle=p.c;X.fillRect(-p.r,-p.r/2,p.r*2,p.r);X.restore()}else circ(p.x,p.y,p.r*(0.4+0.6*k),p.c)}X.globalAlpha=1;
@@ -662,7 +684,7 @@ function drawControls(){
   if(joy.id!=null){X.globalAlpha=0.5;circ(joy.ox,joy.oy,JR,'rgba(255,255,255,0.35)');X.beginPath();X.arc(joy.ox,joy.oy,JR,0,TAU);strokeC('#fff',3);X.globalAlpha=0.85;circ(joy.ox+joy.dx*JR,joy.oy+joy.dy*JR,26,'#fff');X.globalAlpha=1}
   else if(runTime<15&&!(DEBUG&&bot.on)){const x=INL+90,y=H-Math.max(BOT,8)-100;X.globalAlpha=0.3+0.1*Math.sin(T*4);circ(x,y,JR,'rgba(255,255,255,0.4)');circ(x,y,24,'#fff');X.globalAlpha=1;txt('FLY: touch & drag',x,y+JR+14,13,'#fff',{st:'#0d47a1',sw:3})}
   const f=poopBtn(),dn=poopHeld>0;circ(f.x,f.y,f.r,dn?'rgba(255,255,255,0.98)':'rgba(255,255,255,0.75)');X.beginPath();X.arc(f.x,f.y,f.r,0,TAU);strokeC(chiliT>0?'#ff8f00':'#0d47a1',dn?6:4);
-  ell(f.x,f.y-8,13,15,'#fff');X.beginPath();X.ellipse(f.x,f.y-8,13,15,0,0,TAU);strokeC('#90a4ae',2);circ(f.x-4,f.y-12,3,'#e0e0e0');txt('POOP',f.x,f.y+22,15,'#0d47a1');
+  X.save();X.translate(f.x,f.y-6);X.scale(1.25,1.25);poopSwirl();X.restore();txt('POOP',f.x,f.y+22,15,'#0d47a1');
   const s=swoopBtn(),rd=gull.swCD<=0;circ(s.x,s.y,s.r,rd?'rgba(255,213,79,0.85)':'rgba(255,255,255,0.4)');X.beginPath();X.arc(s.x,s.y,s.r,0,TAU);strokeC('#e65100',3);poly([s.x-10,s.y-10,s.x+10,s.y-10,s.x,s.y+6],'#e65100');txt('SWOOP',s.x,s.y+18,10,'#e65100');
   if(megaReady()){const m=megaBtn(),pu=1+Math.sin(T*8)*0.06;circ(m.x,m.y,m.r*pu,'rgba(141,110,99,0.92)');X.beginPath();X.arc(m.x,m.y,m.r*pu,0,TAU);strokeC('#ffd23f',4);txt('MEGA',m.x,m.y-5,13,'#fff');txt('DUMP',m.x,m.y+10,11,'#ffd23f')}}
 // ---------- overlays ----------

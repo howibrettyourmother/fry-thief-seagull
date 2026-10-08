@@ -32,6 +32,28 @@ const AUD=(()=>{
   function n(t,d,out){const s=C.createBufferSource();s.buffer=noiseBuf;s.loop=true;s.connect(out);s.start(t,R());s.stop(t+d+0.05);return s}
   const mtof=m=>440*Math.pow(2,(m-69)/12);
   const blip=(type,f0,f1,t,d,v,out)=>{const G=g(0,out||sfxBus);env(G,t,0.004,d*0.3,d*0.7,v);const x=o(type,f0,t,d,f('lowpass',5000,0.7,G));x.frequency.exponentialRampToValueAtTime(f1,t+d);return x};
+  // ---------- fart machine: 12 synthesized varieties, rate-limited so old iPhones never get audio spam ----------
+  let fNext=0,fTimes=[];
+  function blat(t,f0,f1,d,lfo,depth,lp,q,nz,v,type){const G=g(0,sfxBus);env(G,t,0.008,d*0.6,d*0.38,v);const F=f('lowpass',lp,q,G);
+    const x=o(type||'sawtooth',f0,t,d,F);x.frequency.setValueAtTime(f0,t);x.frequency.linearRampToValueAtTime(f1,t+d);
+    if(lfo){const L=C.createOscillator(),LG=C.createGain();L.frequency.value=lfo;LG.gain.value=f0*depth;L.connect(LG);LG.connect(x.frequency);L.start(t);L.stop(t+d+0.05)}
+    if(nz){const N=g(0,sfxBus);env(N,t,0.008,d*0.5,d*0.4,v*nz);n(t,d,f('lowpass',lp*0.6,1,N))}}
+  const FARTS=[
+    t=>blat(t,95,70,0.32,24,0.35,650,2.5,0.35,0.26),                                   // 0 classic
+    t=>{blat(t,170,210,0.45,9,0.12,1400,3,0.1,0.2);blat(t+0.42,210,120,0.6,11,0.18,1200,3,0.15,0.2)}, // 1 long trumpet
+    t=>blat(t,250,300,0.09,40,0.2,1500,2,0.2,0.2),                                     // 2 tiny toot
+    t=>blat(t,58,42,1.1,11,0.45,380,2,0.6,0.32),                                       // 3 big rumbly
+    t=>blat(t,420,620,0.35,38,0.12,2600,6,0.05,0.12,'square'),                         // 4 squeaky
+    t=>{blat(t,80,60,0.25,30,0.5,500,1.5,1.2,0.22);for(let i=0;i<4;i++)blip('sine',rr(300,700),rr(120,250),t+0.04+i*0.05,0.05,0.06)}, // 5 wet
+    t=>{for(let i=0;i<8;i++)blat(t+i*0.065,rr(110,150),90,0.05,0,0,900,2,0.3,0.2)},    // 6 machine-gun
+    t=>{const G=g(0,sfxBus);env(G,t,0.02,0.6,0.2,0.12);const x=o('triangle',200,t,0.85,G);x.frequency.linearRampToValueAtTime(700,t+0.35);x.frequency.linearRampToValueAtTime(150,t+0.8);blat(t+0.6,90,60,0.25,26,0.4,600,2,0.3,0.2)}, // 7 slide-whistle
+    t=>{for(let i=0;i<5;i++){const s=t+i*0.09+rr(0,0.04);blat(s,rr(80,180),rr(60,120),rr(0.04,0.1),30,0.3,800,2,0.4,0.2)}}, // 8 sputter
+    t=>blat(t,170,55,0.75,14,0.25,900,3,0.2,0.24),                                     // 9 sad trombone
+    t=>{blat(t,140,160,0.08,30,0.2,1200,2,0.2,0.2);blat(t+0.13,120,100,0.14,30,0.25,1000,2,0.2,0.22)}, // 10 double toot
+    t=>{blat(t,300,700,0.22,30,0.1,2400,5,0.05,0.1,'square');blat(t+0.2,75,55,0.4,22,0.45,550,2,0.5,0.28)} // 11 squeal-then-blat
+  ];
+  function fartPlay(k,force){const t=now();if(t<fNext)return;fTimes=fTimes.filter(x=>t-x<1);if(fTimes.length>=(force?5:3))return;fNext=t+0.12;fTimes.push(t);
+    k=k==null?(R()*FARTS.length)|0:Array.isArray(k)?k[(R()*k.length)|0]:k;FARTS[k](t);stats.farts=(stats.farts||0)+1}
   // ---------- SFX (all original synth) ----------
   let lastShot=0;
   const SFX={
@@ -65,9 +87,7 @@ const AUD=(()=>{
     munch:safe(()=>{const t=now();for(let i=0;i<3;i++){const G=g(0,sfxBus);env(G,t+i*0.09,0.002,0.02,0.05,0.22);n(t+i*0.09,0.08,f('bandpass',1800-i*300,1.2,G))}blip('triangle',mtof(84),mtof(91),t+0.28,0.1,0.06)}),
     whistle:safe(()=>{const t=now(),G=g(0,sfxBus);env(G,t,0.01,0.35,0.12,0.09);const x=o('sine',2300,t,0.5,G);const L=C.createOscillator(),LG=C.createGain();L.frequency.value=28;LG.gain.value=120;L.connect(LG);LG.connect(x.frequency);L.start(t);L.stop(t+0.55)}),
     honk:safe(()=>{const t=now();[0,0.22].forEach((d,i)=>{const G=g(0,sfxBus);env(G,t+d,0.01,0.14,0.05,0.07);o('square',i?233:311,t+d,0.2,f('lowpass',1600,1,G));o('square',i?175:233,t+d,0.2,f('lowpass',1600,1,G))})}),
-    fart:safe((k)=>{const t=now();k=k==null?(R()*4)|0:k;const d=[0.32,0.6,0.16,0.9][k],f0=[95,72,140,60][k],G=g(0,sfxBus);env(G,t,0.01,d*0.6,d*0.35,0.3);const F=f('lowpass',[650,480,900,420][k],2.5,G);
-      const x=o('sawtooth',f0,t,d,F);x.frequency.linearRampToValueAtTime(f0*(k===2?1.6:0.7),t+d);const L=C.createOscillator(),LG=C.createGain();L.frequency.value=[24,17,32,12][k];LG.gain.value=f0*0.35;L.connect(LG);LG.connect(x.frequency);L.start(t);L.stop(t+d+0.05);
-      const N=g(0,sfxBus);env(N,t,0.01,d*0.5,d*0.4,0.1);n(t,d,f('lowpass',300,1,N))}),
+    fart:safe((k,force)=>fartPlay(k,force)),
     wet:safe(()=>{const t=now(),G=g(0,sfxBus);env(G,t,0.001,0.04,0.2,0.34);const F=f('bandpass',900,1.4,G);n(t,0.28,F);F.frequency.exponentialRampToValueAtTime(220,t+0.25);
       for(let i=0;i<4;i++){const s=t+0.05+i*0.04+rr(0,0.03);blip('sine',rr(500,900),rr(150,300),s,0.06,0.07)}}),
     mega:safe(()=>{const t=now(),G=g(0,sfxBus);env(G,t,0.002,0.25,0.9,0.5);n(t,1.2,f('lowpass',500,0.8,G));const B=g(0,sfxBus);env(B,t,0.002,0.1,0.5,0.4);const x=o('sine',140,t,0.7,B);x.frequency.exponentialRampToValueAtTime(30,t+0.6)}),
