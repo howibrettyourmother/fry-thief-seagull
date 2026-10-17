@@ -9,8 +9,8 @@ const QUALS=[1,0.8,0.66];let qualI=0;
 const insEl=document.createElement('div');insEl.style.cssText='position:fixed;left:0;top:0;width:0;height:0;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);visibility:hidden;pointer-events:none';document.body.appendChild(insEl);
 function resize(){SW=innerWidth;SH=innerHeight;
   // older iPhones: cap the backing store at 2x and let the adaptive quality step drop it further if frames get slow
-  DPR=Math.min(devicePixelRatio||1,2)*QUAL;
-  SC=Math.min(SW/400,SH/560);W=SW/SC;H=SH/SC;RS=SC*DPR;
+  DPR=Math.min(devicePixelRatio||1,Math.min(SW,SH)>=700?1.5:2)*QUAL; // iPad (A10): 1.5x backing store keeps big-screen fill rate smooth
+  SC=Math.min(SW/400,SH/(SW>SH&&SH>=700?520:560));W=SW/SC; /* iPad landscape: ~10% bigger art/buttons */H=SH/SC;RS=SC*DPR;
   const cs=getComputedStyle(insEl);let t=parseFloat(cs.paddingTop)||0,b=parseFloat(cs.paddingBottom)||0;
   if(SAFE_DBG){t=+SAFE_DBG[1];b=+SAFE_DBG[2]}
   TOP=t/SC;BOT=b/SC;INL=(parseFloat(cs.paddingLeft)||0)/SC;INR=(parseFloat(cs.paddingRight)||0)/SC;

@@ -1,5 +1,5 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="app-version" content="1.1.0">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Poopy Gull"><meta name="application-name" content="Poopy Seagull"><meta name="theme-color" content="#29b6f6">
 <title>Poopy Seagull</title>
 <meta name="description" content="Be a silly seagull at Michigan beaches: splat the beachgoers, swoop down and steal their French fries, and beat five goofy bosses!">
@@ -191,8 +191,8 @@ const QUALS=[1,0.8,0.66];let qualI=0;
 const insEl=document.createElement('div');insEl.style.cssText='position:fixed;left:0;top:0;width:0;height:0;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);visibility:hidden;pointer-events:none';document.body.appendChild(insEl);
 function resize(){SW=innerWidth;SH=innerHeight;
   // older iPhones: cap the backing store at 2x and let the adaptive quality step drop it further if frames get slow
-  DPR=Math.min(devicePixelRatio||1,2)*QUAL;
-  SC=Math.min(SW/400,SH/560);W=SW/SC;H=SH/SC;RS=SC*DPR;
+  DPR=Math.min(devicePixelRatio||1,Math.min(SW,SH)>=700?1.5:2)*QUAL; // iPad (A10): 1.5x backing store keeps big-screen fill rate smooth
+  SC=Math.min(SW/400,SH/(SW>SH&&SH>=700?520:560));W=SW/SC; /* iPad landscape: ~10% bigger art/buttons */H=SH/SC;RS=SC*DPR;
   const cs=getComputedStyle(insEl);let t=parseFloat(cs.paddingTop)||0,b=parseFloat(cs.paddingBottom)||0;
   if(SAFE_DBG){t=+SAFE_DBG[1];b=+SAFE_DBG[2]}
   TOP=t/SC;BOT=b/SC;INL=(parseFloat(cs.paddingLeft)||0)/SC;INR=(parseFloat(cs.paddingRight)||0)/SC;
