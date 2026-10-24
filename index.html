@@ -210,7 +210,7 @@ const YMAX=()=>GY()-34;
 const XMIN=()=>INL+36,XMAX=()=>boss?W-INR-40:W*0.78;
 // ---------- persistence ----------
 const LS={get:(k,d)=>{try{const v=localStorage.getItem('fts_'+k);return v==null?d:v}catch(e){return d}},set:(k,v)=>{try{localStorage.setItem('fts_'+k,v)}catch(e){}}};
-let diff=+LS.get('diff',0)||0,best=+LS.get('best'+diff,0)||0,bestWave=+LS.get('bestwave',0)||0;
+let diff=+LS.get('diff',1),best=+LS.get('best'+diff,0)||0,bestWave=+LS.get('bestwave',0)||0;
 // ---------- drawing helpers ----------
 function txt(s,x,y,size,fill,o){o=o||{};X.font=(o.wt||'800 ')+size+'px '+FONT;X.textAlign=o.a||'center';X.textBaseline='middle';
   if(o.st){X.lineJoin='round';X.lineWidth=o.sw||size*0.22;X.strokeStyle=o.st;X.strokeText(s,x,y)}X.fillStyle=fill;X.fillText(s,x,y)}
