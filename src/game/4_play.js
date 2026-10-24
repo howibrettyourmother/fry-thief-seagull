@@ -197,7 +197,8 @@ function update(dt){T+=dt;stT+=dt;if(banner){banner.t+=dt;if(banner.t>2.6)banner
   for(const p of people){if(p.run){p.vx=p.dir*180;p.walk=1}p.x+=(-spd+p.vx)*dt;p.sayT-=dt;if(p.mood==='mad'&&!p.run&&p.k!=='sun'&&p.k!=='kidl')p.arm=-2.4+Math.sin(T*18)*0.35;
     if(p.spit&&R()<0.3)burst(p.x-8,g-70,1,['#b3e5fc'],80,2);
     if(!p.run&&!p.splat&&p.x>W*0.15&&p.x<W-10){const sx=p.x+12,sy=g-60;
-      if(p.k==='kid'&&(p.cd-=dt)<=0){shoot('balloon',p.x,sy,lobL(p.x,sy,rr(0.8,1.0),500,25),{g:500,r:9,c:pick(['#4fc3f7','#ff80ab','#b2ff59'])});p.cd=Math.max(1.2,rr(2.1,2.9)-D()*0.1)}
+      if(p.k==='kid'&&p.cd<0.45)p.arm=-2.3;
+      if(p.k==='kid'&&(p.cd-=dt)<=0){if(shots.filter(q=>q.k==='balloon'&&!q.dead).length>=2)p.cd=0.3;else{const ft=rr(1.2,1.4),ld=Math.min(0.5,Math.max(0,(D()-2)*0.1)),tx=gull.x+gull.vx*ft*0.8*ld+rr(-25,25),ty=gull.y+gull.vy*ft*0.5*ld+rr(-15,15);shoot('balloon',p.x,sy,lob(p.x,sy,tx,ty,ft,500),{g:500,r:9,hr:6,c:pick(['#4fc3f7','#ff80ab','#b2ff59'])});p.cd=Math.max(2.0,rr(2.6,3.4)-D()*0.1)}}
       if(p.k==='guard'&&(p.cd-=dt)<=0){const n=D()>=3?5:3;fan('water',sx,g-52,n,0.35+n*0.05,330,{r:6});AUD.SFX.puff();p.cd=Math.max(1.4,rr(2.2,2.8)-D()*0.1)}
       if(p.k==='bro'&&(p.cd-=dt)<=0){const a=aimA(sx,sy,300);shoot('frisbee',sx,sy,{vx:Math.cos(a)*300*SPM(),vy:Math.sin(a)*300*SPM()},{r:13,ax:-Math.cos(a)*280,ay:-Math.sin(a)*280,life:3});p.cd=Math.max(1.8,rr(2.6,3.2)-D()*0.1)}}
     if(p.fries&&Math.hypot(gull.x+40-(p.x+12),gull.y-(g-46))<grab)stealFries(p)}
@@ -221,7 +222,7 @@ function update(dt){T+=dt;stT+=dt;if(banner){banner.t+=dt;if(banner.t>2.6)banner
   for(const s of shots){s.vy+=(s.g||0)*dt;if(s.ax){s.vx+=s.ax*dt;s.vy+=s.ay*dt}s.x+=s.vx*dt;s.y+=s.vy*dt;s.life-=dt;if(s.bounce&&s.y>g-12){s.y=g-12;s.vy=-s.bounce*(Math.abs(s.x-gull.x)<120?1:0.4)}
     const dd=Math.hypot(s.x-gull.x-8,s.y-gull.y);
     if(s.good){if(dd<s.r+30){s.dead=1;if(s.k==='heart'){hearts=Math.min(maxH(),hearts+1);AUD.SFX.heart();float('+1 ♥',s.x,s.y,'#ff8fab')}else{gull.munch=0.5;gull.carry=0.6;addScore(25,s.x,s.y,'#ffd23f');AUD.SFX.munch();if(R()<0.35)AUD.SFX.fart([2,10]);eatFry(1,s.chili)}}}
-    else if(dd<s.r+16){s.dead=1;burst(s.x,s.y,8,[s.k==='ketchup'?'#d32f2f':s.k==='mustard'?'#fbc02d':'#4fc3f7','#fff'],120,4);hurt()}
+    else if(dd<(s.hr||s.r)+16){s.dead=1;burst(s.x,s.y,8,[s.k==='ketchup'?'#d32f2f':s.k==='mustard'?'#fbc02d':'#4fc3f7','#fff'],120,4);hurt()}
     if((!s.bounce&&s.y>g+20)||s.x<-60||s.x>W+80||s.y<-80||s.life<=0)s.dead=1}
   shots=shots.filter(s=>!s.dead);
   if(score>best&&(bestT-=dt)<=0){bestT=2;best=score;LS.set('best'+diff,best)}}

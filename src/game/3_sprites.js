@@ -48,7 +48,7 @@ function drawPerson(p){const g=GY(),x=p.x,kid=p.k==='kid'||p.k==='kidl',s=kid?0.
   const ang=p.arm||0;X.beginPath();X.moveTo(-10*s,y0-56*s);X.lineTo(-18*s,y0-40*s);strokeL(5*s,p.skin);
   X.save();X.translate(10*s,y0-56*s);X.rotate(ang);X.beginPath();X.moveTo(0,0);X.lineTo(10*s,14*s);strokeL(5*s,p.skin);
   if(p.k==='fry'&&p.fries)fryCone(12*s,12*s,0.9,p.chili);if(p.k==='buff'&&!p.splat){circ(10*s,4*s,8*s,p.skin)}if(p.k==='kidl'&&p.mood==='laugh'){X.beginPath();X.moveTo(10*s,14*s);X.lineTo(22*s,8*s);strokeL(3,p.skin)}if(p.mood==='mad'&&!p.run)circ(10*s,15*s,4*s,p.skin);
-  if(p.k==='kid'&&!p.run&&p.cd<0.6)circ(12*s,16*s,6,'#4fc3f7');
+  if(p.k==='kid'&&!p.run&&p.cd<0.6)circ(12*s,16*s,6,'#4fc3f7');if(p.k==='kid'&&!p.run&&!p.splat&&p.cd<0.45&&Math.sin(T*30)>0){X.strokeStyle='#ffeb3b';X.lineWidth=3;X.beginPath();X.arc(12*s,16*s,11,0,7);X.stroke()}
   if(p.k==='guard'&&!p.run){X.fillStyle='#ffb300';X.fillRect(6*s,10*s,18,7);X.fillStyle='#29b6f6';X.fillRect(20*s,8*s,6,4)}
   X.restore();
   circ(0,y0-72*s,12*s,p.skin);if(p.k==='toupee'){if(!p.bald){X.fillStyle=p.hair;X.beginPath();X.ellipse(0,y0-82*s,12*s,5*s,-0.15,0,TAU);X.fill();poly([8*s,y0-84*s,18*s,y0-80*s,9*s,y0-79*s],p.hair)}else{ell(-4*s,y0-79*s,4*s,2.5*s,'rgba(255,255,255,0.7)')}}
