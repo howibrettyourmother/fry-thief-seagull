@@ -47,3 +47,4 @@ combo|Splat combo!|amy
 perfect|No hits! Score bonus!|amy
 wave|Wave complete!|amy
 hard|Hard mode. Good luck, bird.|ryan
+t6|All aboard the poop ferry!|kusal

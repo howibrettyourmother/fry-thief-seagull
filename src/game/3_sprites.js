@@ -77,6 +77,7 @@ function drawShot(s){const k=s.k;
   else if(k==='mustard'){circ(s.x,s.y,s.r,'#fbc02d');circ(s.x-3,s.y-3,s.r*0.3,'#fff59d')}
   else if(k==='bucket'){X.save();X.translate(s.x,s.y);X.rotate(T*6);X.fillStyle=s.c||'#ff7043';X.beginPath();X.moveTo(-10,-10);X.lineTo(10,-10);X.lineTo(7,10);X.lineTo(-7,10);X.closePath();X.fill();X.fillStyle='#f3d9a0';X.fillRect(-10,-13,20,4);X.restore()}
   else if(k==='ball'){X.save();X.translate(s.x,s.y);X.rotate(T*5);const C=['#e53935','#fff','#1e88e5','#fff','#fdd835','#fff'];for(let i=0;i<6;i++){X.beginPath();X.moveTo(0,0);X.arc(0,0,s.r,i*TAU/6,(i+1)*TAU/6);X.closePath();X.fillStyle=C[i];X.fill()}X.restore()}
+  else if(k==='fudge'){X.save();X.translate(s.x,s.y);X.rotate(Math.atan2(s.vy||0,s.vx||1));rrect(-10,-7,20,14,4);X.fillStyle=s.c||'#6d4c41';X.fill();X.fillStyle='#ffe0b2';X.fillRect(-6,-3,12,4);X.restore()}
   else if(k==='hotdog'){X.save();X.translate(s.x,s.y);X.rotate(Math.atan2(s.vy,s.vx));ell(0,0,16,7,'#ffcc80');ell(0,-1,18,4.5,'#c0392b');X.beginPath();X.moveTo(-12,-2);for(let i=-12;i<=12;i+=4)X.lineTo(i,-2+(i%8?2:-2));strokeL(2,'#fbc02d');X.restore()}
   else if(k==='crab'){X.save();X.translate(s.x,s.y);ell(0,0,14,9,'#e53935');circ(-6,-9,3,'#fff');circ(6,-9,3,'#fff');circ(-6,-9,1.5,'#222');circ(6,-9,1.5,'#222');const c=Math.sin(T*14)*3;circ(-17,-4+c,5,'#e53935');circ(17,-4-c,5,'#e53935');X.restore()}
   else if(k==='frisbee'){X.save();X.translate(s.x,s.y);X.rotate(T*12);ell(0,0,14,5,'#ff4081');ell(0,-1,8,2.5,'#ff80ab');X.restore()}

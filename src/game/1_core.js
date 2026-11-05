@@ -4,7 +4,7 @@ const Q=location.search,DEBUG=/[?&]debug=1/.test(Q),OGMODE=/[?&]og=1/.test(Q);
 const SAFE_DBG=DEBUG&&Q.match(/[?&]safe=(\d+),(\d+)/);
 const FONT='"Baloo2Z","Baloo 2","Arial Rounded MT Bold","Trebuchet MS",system-ui,sans-serif';
 let SW=0,SH=0,DPR=1,SC=1,RS=1,W=400,H=760,TOP=0,BOT=0,INL=0,INR=0,QUAL=1,genCache=0;
-const QUALS=[1,0.8,0.66];let qualI=0;
+const QUALS=[1,0.8,0.66,0.5];let qualI=0;
 // in standalone (Home Screen) mode the canvas runs under the status bar / notch / home indicator: measure env(safe-area-inset-*)
 const insEl=document.createElement('div');insEl.style.cssText='position:fixed;left:0;top:0;width:0;height:0;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);visibility:hidden;pointer-events:none';document.body.appendChild(insEl);
 function resize(){SW=innerWidth;SH=innerHeight;

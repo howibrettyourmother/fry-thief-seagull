@@ -4,6 +4,9 @@ let lv=0,L=LEVELS[0],loop=0,wave=0,waveT=0,spawnT=1,dogT=8,heartT=40;
 let gull={x:110,y:300,vx:0,vy:0,flap:0,tilt:0,inv:0,carry:0,munch:0,cd:0,sw:0,swCD:0},people=[],umbs=[],cars=[],dogs=[],poops=[],shots=[],decals=[],debris=[],parts=[],floats=[],boss=null,banner=null,card=null;
 const WAVELEN=34,maxH=()=>diff?3:5;
 let hearts=5,score=0,combo=0,comboT=0,shake=0,oopsN=0,runTime=0,poopN=0,endStats=null,unlockLv=Math.max(1,+LS.get('unlock',1)||1),selLv=0,bestT=0;
+let stickers=(()=>{try{return JSON.parse(LS.get('stickers','[]')||'[]')}catch(e){return []}})();
+function earnSticker(i){if(stickers.indexOf(i)<0){stickers.push(i);LS.set('stickers',JSON.stringify(stickers));banner={s:'STICKER! '+LEVELS[i].n,t:0};AUD.SFX.cheer()}}
+function hasSticker(i){return stickers.indexOf(i)>=0}
 let fryM=100,hangry=0,megaN=0,megaC=0,chiliT=0,fartT=0,noHit=0;
 const RUN={},WV={};function zero(o){Object.assign(o,{splats:0,fries:0,dads:0,toupees:0,megas:0,hits:0,s0:score})}
 const say=(k,p)=>AUD.say(k,p);
@@ -18,7 +21,9 @@ function startLevel(i){if(i>=LEVELS.length){i=0;loop++;}lv=i;L=LEVELS[i];wave=0;
 function startPlay(){state='play';stT=0;gull.x=110;gull.y=(YMIN()+YMAX())/2;gull.vx=gull.vy=0;gull.inv=1;startWave(0)}
 function startWave(w){wave=w;waveT=0;spawnT=0.5;dogT=lv+loop+diff>0||w>0?rr(5,9):99;heartT=rr(40,55);state='play';stT=0;zero(WV);resetInput();
   if(w===2){spawnBoss();return}banner={s:'WAVE '+(lv+1)+'-'+(w+1),t:0};if(w===1){say('w2',2);AUD.SFX.check()}}
-function spawnBoss(){const k=['larry','chef','king','bot','truck'][lv],def=BOSS[k];AUD.setTheme(lv===4?'king':'boss');AUD.SFX.warn();
+function spawnBoss(){const k=['larry','chef','king','bot','truck','ferry'][lv],def=BOSS[k];AUD.setTheme(lv>=4?'king':'boss');AUD.SFX.warn();
+  // Boss fights are fill-rate heavy on iPad — drop quality one step immediately
+  if(qualI<QUALS.length-1){qualI=Math.min(QUALS.length-1,qualI+1);QUAL=QUALS[qualI];resize()}
   const hp=Math.round((30+lv*6)*(1+loop*0.3)*(diff?1.3:1));boss={k,name:def.name,x:W+160,hp,max:hp,st:'enter',t:0,at:1.5,flash:0,spl:[],n:0,ph:1,hits:0,say:'',sayT:0};def.init&&def.init(boss);
   banner={s:def.name,t:0,boss:1};setTimeout(()=>{say('b'+(lv+1),3);bossSay(pick(def.taunts))},300)}
 function bossSay(s){if(boss){boss.say=s;boss.sayT=2.2}}
@@ -26,7 +31,7 @@ function waveEnd(){// gross-out stats card; no-hit waves pay a multiplier
   const pts=score-WV.s0;let bonus=0,mult=1;if(WV.hits===0){noHit++;mult=Math.min(2.5,1.5+0.25*(noHit-1));bonus=Math.round(pts*(mult-1));score+=bonus;setTimeout(()=>say('perfect',2),900)}else noHit=0;
   card={boss:wave===2,rows:[['Butts Bombed',WV.splats],['Fries Yoinked',WV.fries],['Dads Ruined',WV.dads],['Toupees Launched',WV.toupees],['Mega Dumps',WV.megas],['Hits Taken',WV.hits],['Continues (run)',oopsN]],pts,bonus,mult};
   state='stats';stT=0;shots=shots.filter(s=>s.good&&s.k!=='heart');poops=[];resetInput();saveBest();AUD.SFX.fanfare();setTimeout(()=>AUD.SFX.fart(wave===2?1:[1,7,11],1),900);say(wave===2?'d'+(lv+1):'wave',3);
-  if(wave===2){unlockLv=Math.max(unlockLv,Math.min(5,lv+2));LS.set('unlock',unlockLv)}}
+  if(wave===2){unlockLv=Math.max(unlockLv,Math.min(LEVELS.length,lv+2));LS.set('unlock',unlockLv)}}
 function nextFromStats(){if(wave<2)startWave(wave+1);else if(lv===LEVELS.length-1)finish();else startLevel(lv+1)}
 function finish(){state='win';stT=0;endStats={score,loop,...RUN,cont:oopsN};boss=null;shots=[];AUD.setTheme('win');AUD.SFX.cheer();setTimeout(()=>say('legend',3),500);confetti(120);saveBest()}
 function saveBest(){if(score>best){best=score;LS.set('best'+diff,best)}}
@@ -35,9 +40,9 @@ function respawn(){// continue: full hearts, back to the start of this wave (bos
   hearts=maxH();state='play';stT=0;shots=[];poops=[];dogs=[];gull.inv=2;gull.x=110;gull.y=(YMIN()+YMAX())/2;gull.vx=gull.vy=0;fryM=Math.max(fryM,70);hangry=0;
   if(wave===2&&boss){boss.st='fight';boss.at=2;WV.hits=1}else{people=[];umbs=[];cars=[];const s0=WV.s0;startWave(wave);WV.s0=s0;WV.hits=1}}
 // ---------- fx ----------
-function burst(x,y,n,cols,sp,r){for(let i=0;i<n&&parts.length<170;i++){const a=R()*TAU,v=rr(0.3,1)*(sp||160);parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,t:0,life:rr(0.4,0.8),r:rr(2,r||5),c:pick(cols)})}}
+function burst(x,y,n,cols,sp,r){for(let i=0;i<n&&parts.length<(boss?110:170);i++){const a=R()*TAU,v=rr(0.3,1)*(sp||160);parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,t:0,life:rr(0.4,0.8),r:rr(2,r||5),c:pick(cols)})}}
 function float(s,x,y,c){if(floats.length<14)floats.push({s,x,y,t:0,c:c||'#fff'})}
-function confetti(n){for(let i=0;i<n&&parts.length<170;i++)parts.push({x:rr(0,W),y:TOP-10,vx:rr(-40,40),vy:rr(60,180),t:0,life:rr(1.6,3),r:rr(3,6),c:pick(['#ffd23f','#ff5d8f','#4fc3f7','#81c784','#ff8a26','#b388ff']),conf:1,rot:rr(0,6)})}
+function confetti(n){for(let i=0;i<n&&parts.length<(boss?110:170);i++)parts.push({x:rr(0,W),y:TOP-10,vx:rr(-40,40),vy:rr(60,180),t:0,life:rr(1.6,3),r:rr(3,6),c:pick(['#ffd23f','#ff5d8f','#4fc3f7','#81c784','#ff8a26','#b388ff']),conf:1,rot:rr(0,6)})}
 // ---------- spawning ----------
 function mkPerson(k,x){const p={k,x:x||W+50,dir:-1,walk:0,skin:pick(SKINS),shirt:pick(SHIRTS),shorts:pick(SHIRTS),hair:pick(HAIRS),hat:R()<0.25&&k!=='toupee'&&k!=='dad'?pick(['#fff','#ffd23f','#ff7043']):null,towel:pick(SHIRTS),
   mood:'happy',splat:0,run:0,fries:k==='fry'?1:0,chili:0,cd:rr(0.6,1.5),say:'',sayT:0,arm:0,vx:0,up:0};
@@ -145,8 +150,27 @@ const BOSS={
      X.beginPath();X.moveTo(x-80,g-170);for(let i=-80;i<=100;i+=10)X.lineTo(x+i,g-170+(i%20?4:-4));strokeL(4,'#fbc02d');X.fillStyle='#e53935';X.fillRect(x-100,g-60,200,16);
      X.fillStyle='#4fc3f7';rrect(x-90,g-118,50,40,8);X.fill();circ(x-66,g-96,12,'#e0ac69');X.fillStyle='#e53935';X.fillRect(x-76,g-112,22,6);
      txt('HOT DOGS',x+30,g-96,20,'#c62828');for(const wx of [-60,60]){circ(x+wx,g-28,20,'#333');circ(x+wx,g-28,9,'#bdbdbd');X.save();X.translate(x+wx,g-28);X.rotate(scroll*0.05);X.fillStyle='#757575';X.fillRect(-2,-9,4,18);X.restore()}
-     circ(x-100,g-60,7,'#fff59d')}}
+     circ(x-100,g-60,7,'#fff59d')}},
+ ferry:{name:'Captain Fudge',taunts:['ALL ABOARD THE POOP FERRY!','NO BIRDS ON DECK!','FUDGE THIS WAY!','ABANDON SHEEP!'],rects:b=>[[b.x-110,GY()-190,220,170]],
+   init(b){b.dir=-1;b.horn=0},
+   upd(b,dt){b.horn=Math.max(0,(b.horn||0)-dt);const sp=[35,60,85][b.ph-1];b.x+=b.dir*sp*dt;if(b.x<W*0.5)b.dir=1;if(b.x>W-INR-80)b.dir=-1;if((b.at-=dt)>0)return;b.n++;
+     if(b.n%4===0){b.horn=0.5;AUD.SFX.honk();float('TOOT TOOT!',b.x,GY()-220,'#fff');fan('ring',b.x-40,GY()-160,b.ph>=2?6:4,1.1,190,{r:13});if(b.ph>=3)rain('water',5,{r:9})}
+     else{AUD.SFX.pop();for(let i=0;i<2+b.ph;i++)shoot('fudge',b.x-20,GY()-170,lobL(b.x,GY()-170,rr(0.85,1.15),460,55),{g:460,r:11,c:'#6d4c41'});
+       if(b.ph>=2)fan('mustard',b.x-30,GY()-140,4,0.65,220,{r:8});if(b.ph>=3&&b.n%2)spiral('fudge',b.x,GY()-180,10,160,b.n*0.4,{r:10,c:'#5d4037'})}
+     b.at=[1.55,1.25,1.0][b.ph-1]},
+   draw(b){const g=GY(),x=b.x;X.fillStyle='#546e7a';rrect(x-110,g-100,220,70,10);X.fill();X.fillStyle='#37474f';X.fillRect(x-100,g-150,200,50);
+     X.fillStyle='#90caf9';rrect(x-85,g-140,50,30,6);X.fill();rrect(x-20,g-140,50,30,6);X.fill();rrect(x+45,g-140,40,30,6);X.fill();
+     X.fillStyle='#c62828';X.fillRect(x-110,g-108,220,10);txt('MACKINAC FERRY',x,g-125,14,'#fff');
+     // smokestack
+     X.fillStyle='#455a64';X.fillRect(x+50,g-200,22,50);X.fillStyle='#ef5350';X.fillRect(x+48,g-208,26,10);
+     if(b.horn>0){for(let i=0;i<3;i++)circ(x+61+Math.sin(T*8+i)*4,g-220-i*14,8+i*2,'rgba(200,200,200,0.5)')}
+     // captain
+     circ(x-40,g-175,18,'#e0ac69');X.fillStyle='#1a237e';rrect(x-52,g-198,24,16,4);X.fill();X.fillStyle='#fff';X.fillRect(x-54,g-202,28,5);face(x-40,g-173,16,'mad');
+     for(const wx of [-70,70]){circ(x+wx,g-28,18,'#263238');circ(x+wx,g-28,8,'#90a4ae')}
+     // fudge crate
+     X.fillStyle='#6d4c41';rrect(x-90,g-70,40,28,4);X.fill();txt('FUDGE',x-70,g-54,10,'#ffe0b2')}},
 };
+
 function updBoss(dt){const b=boss,def=BOSS[b.k];b.flash=Math.max(0,b.flash-dt);b.sayT-=dt;
   if(b.st==='enter'){b.t+=dt;const tx=W*0.7;b.x=lerp(b.x,tx,Math.min(1,dt*2.2));if(b.k==='bot')def.upd(b,0);if(Math.abs(b.x-tx)<3){b.st='fight';b.at=1.2}return}
   if(b.st==='fight'){def.upd(b,dt);if(R()<dt*0.12)bossSay(pick(def.taunts));return}
@@ -154,7 +178,7 @@ function updBoss(dt){const b=boss,def=BOSS[b.k];b.flash=Math.max(0,b.flash-dt);b
 function bossHit(po,dmg){const b=boss;b.hp-=dmg;b.hits++;b.flash=0.12;AUD.SFX.bossHit();score+=20*dmg;burst(po.x,po.y,8,['#8b5a2b','#5a3517'],120,3);if(R()<0.25)AUD.SFX.fart([2,10,4,0]);if(b.spl.length<14)b.spl.push([po.x-b.x,po.y-GY()]);
   if(b.hits%6===0)shots.push({k:'fry',x:b.x-40,y:GY()-180,vx:rr(-160,-60),vy:-300,g:420,r:10,good:1,life:4});
   const ph=b.hp>b.max*0.66?1:b.hp>b.max*0.33?2:3;if(ph>b.ph&&b.hp>0){b.ph=ph;b.at=1.2;banner={s:'PHASE '+ph+'!',t:0};say('t'+(lv+1),3);bossSay(pick(BOSS[b.k].taunts));AUD.SFX.warn();shake=10}
-  if(b.hp<=0){b.hp=0;b.st='down';b.t=0;shots=shots.filter(s=>s.good);AUD.SFX.bossDown();AUD.SFX.fart(3,1);addScore(1500,b.x,GY()-260,'#ffe14d');confetti(60);bossSay(['MY WHISTLE IS FULL OF POOP!','THAT\'S NOT MY SECRET SAUCE!','IT SMELLS LIKE A PORTA POTTY!','TOO. MUCH. POOP.','MY HOT DOGS!'][lv])}}
+  if(b.hp<=0){b.hp=0;b.st='down';b.t=0;shots=shots.filter(s=>s.good);AUD.SFX.bossDown();AUD.SFX.fart(3,1);addScore(1500,b.x,GY()-260,'#ffe14d');confetti(60);bossSay(['MY WHISTLE IS FULL OF POOP!','THAT\'S NOT MY SECRET SAUCE!','IT SMELLS LIKE A PORTA POTTY!','TOO. MUCH. POOP.','MY HOT DOGS!','MY FERRY IS FULL OF FUDGE POOP!'][lv]);earnSticker(lv)}}
 // ---------- poop ----------
 function dropPoop(){const ch=chiliT>0;poops.push({x:gull.x-6+(ch?rr(-8,8):0),y:gull.y+14,vx:gull.vx*0.3+(ch?rr(-40,40):0),vy:80,small:ch});gull.cd=ch?0.07:hangry?0.5:0.2;poopN++;
   if(ch){if(T>=fartT){AUD.SFX.fart([6,8,6,5]);fartT=T+0.4}}else{AUD.SFX.plop();if(R()<0.18)AUD.SFX.fart([2,0,4,10]);if(poopN===1||R()<0.05)say(pick(['bombs','bombs','splat']),1)}}

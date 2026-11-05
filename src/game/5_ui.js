@@ -86,16 +86,18 @@ function drawTitle(){UI=[];lv=selLv;L=LEVELS[lv];drawBackdrop(selLv);X.fillStyle
   txt('Steal fries. Bomb butts. No regrets.',W/2,ly+72,16,'#fff',{st:'#0d47a1',sw:5});
   const gy=lerp(ly+160,H*0.4,0.5)+Math.sin(T*2.4)*8,s=Math.min(2.3,H/320);X.save();X.translate(W/2-10,gy);X.scale(s,s);drawGull(0,0,{flap:T*9,tilt:Math.sin(T*1.7)*0.08,carry:true});X.restore();
   for(let i=0;i<4;i++){const a=T*1.2+i*TAU/4;fryCone(W/2+Math.cos(a)*130,gy+Math.sin(a)*36+10,0.9)}
-  const sy=H*0.6,gap=Math.min(70,(W-40)/5),x0=W/2-gap*2;txt('PICK A BEACH',W/2,sy-46,16,'#fff',{st:'#0d47a1',sw:5});
-  for(let i=0;i<5;i++){const x=x0+i*gap,ok=i<unlockLv,sel=i===selLv,r=sel?29:25;circ(x,sy,r+4,sel?'#fff':'rgba(255,255,255,0.6)');circ(x,sy,r,ok?['#ff5d8f','#e53935','#ffb300','#7e57c2','#26a69a'][i]:'#9e9e9e');
+  const sy=H*0.6,N0=LEVELS.length,gap=Math.min(64,(W-40)/N0),x0=W/2-gap*(N0-1)/2;txt('PICK A BEACH',W/2,sy-46,16,'#fff',{st:'#0d47a1',sw:5});
+  const N=LEVELS.length,cols=['#ff5d8f','#e53935','#ffb300','#7e57c2','#26a69a','#8d6e63'];for(let i=0;i<N;i++){const x=x0+i*gap,ok=i<unlockLv,sel=i===selLv,r=sel?27:23;circ(x,sy,r+4,sel?'#fff':'rgba(255,255,255,0.6)');circ(x,sy,r,ok?cols[i]:'#9e9e9e');
     if(ok)txt(String(i+1),x,sy+2,26,'#fff',{st:'rgba(0,0,0,0.3)',sw:4});else lockIcon(x,sy);
     btn('lv'+(i+1),x-gap/2,sy-34,gap,68,()=>{if(ok){selLv=i;AUD.SFX.boing()}else AUD.SFX.zap()})}
   wrapTxt(LEVELS[selLv].n,W/2,sy+48,19,'#fff',W-30,{st:'#0d47a1',sw:5});
+  // sticker shelf
+  for(let i=0;i<N;i++){const sx=W/2-(N-1)*18+i*36;if(hasSticker(i)){circ(sx,sy+72,12,cols[i]);txt('⭐',sx,sy+76,14,'#fff')}else{circ(sx,sy+72,10,'rgba(255,255,255,0.25)')}}
   const py=Math.min(H-BOT-150,sy+80),pulse=1+Math.sin(T*5)*0.04;X.save();X.translate(W/2,py+38);X.scale(pulse,pulse);X.translate(-W/2,-(py+38));bigBtn('play',W/2-110,py,220,76,'PLAY ▶','#43a047',()=>{newGame(selLv);AUD.SFX.squawk()},38);X.restore();
   const bb=H-BOT-46,mx=W-INR-40;circ(mx,bb,24,'#4fc3f7');poly([mx-10,bb-5,mx-4,bb-5,mx+3,bb-12,mx+3,bb+12,mx-4,bb+5,mx-10,bb+5],'#0d47a1');if(AUD.muted){X.beginPath();X.moveTo(mx-14,bb-14);X.lineTo(mx+14,bb+14);strokeC('#c62828',4)}btn('mute',mx-28,bb-28,56,56,()=>AUD.setMuted(!AUD.muted));
   bigBtn('diff',INL+14,bb-24,150,48,diff?'HARD':'NORMAL',diff?'#e53935':'#ff8a26',()=>{diff=1-diff;LS.set('diff',diff);best=+LS.get('best'+diff,0)||0;AUD.SFX[diff?'fart':'boing']()},20);txt('BEST '+best,W/2+30,bb,17,'#fff',{st:'#0d47a1',sw:4})}
 // ---------- victory ----------
-function drawWin(){UI=[];lv=4;L=LEVELS[4];drawBackdrop(4);X.fillStyle='rgba(255,240,200,0.2)';X.fillRect(0,0,W,H);const e=endStats||{score,loop,...RUN,cont:oopsN};
+function drawWin(){UI=[];lv=LEVELS.length-1;L=LEVELS[lv];drawBackdrop(lv);X.fillStyle='rgba(255,240,200,0.2)';X.fillRect(0,0,W,H);const e=endStats||{score,loop,...RUN,cont:oopsN};
   const y0=TOP+40;txt('POOPY SEAGULL',W/2,y0+10,Math.min(44,W*0.11),'#ffd23f',{st:'#0d47a1',sw:8});txt('LEGEND!',W/2,y0+56,Math.min(50,W*0.12),'#fff',{st:'#e65100',sw:8});
   const gy=y0+140+Math.sin(T*3)*10;X.save();X.translate(W/2,gy);X.scale(1.5,1.5);drawGull(0,0,{flap:T*10,carry:true,munch:1});X.restore();X.save();X.translate(W/2+30,gy-44);poly([-22,0,-22,-26,-11,-14,0,-30,11,-14,22,-26,22,0],'#ffd23f');X.restore();
   const rows=[['Summer'+(diff?' (HARD)':''),e.loop+1],['Butts Bombed',e.splats],['Fries Yoinked',e.fries],['Dads Ruined',e.dads],['Toupees Launched',e.toupees],['Mega Dumps',e.megas],['Continues',e.cont],['Score',e.score],['Best',best]];
